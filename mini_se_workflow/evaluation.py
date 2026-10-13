@@ -114,6 +114,9 @@ def evaluate(client, store: RunStore, *, mode: str, selected=None, output: Path 
             if state.files:
                 independent = AcceptanceRunner().run(state.files, copy.deepcopy(item['checks']))
             success = state.status == 'approved' and bool(independent and independent['passed'])
+        state.independent_evaluation = {'case_id': item['id'], 'mode': mode, 'expected': item['expected'],
+            'success': success, 'suite_sha256': report['suite_sha256'], 'report': independent}
+        store.save(state.to_dict())
         report['results'].append({'id': item['id'], 'category': item['category'], 'expected': item['expected'],
             'run_id': state.run_id, 'status': state.status, 'success': success, 'repair_count': state.repair_count,
             'error': error, 'independent': independent, 'questions': state.specification.get('questions', [])})

@@ -49,6 +49,22 @@ def delivery_report(state: dict) -> str:
                         lines.append(f"- {case['id']}：{step.get('difference') or step.get('error')}")
         for change in changes['changes']:
             lines += ['', f"文件：{change['file']}（{change['kind']}）", '```diff', change['diff'].rstrip(), '```']
+    independent = state.get('independent_evaluation', {})
+    lines += ['', '## 独立评测', '']
+    if independent:
+        lines += [f"评测编号：{independent.get('case_id')}；模式：{independent.get('mode')}",
+            f"评测结果：{'通过' if independent.get('success') else '未通过'}；与流程验收状态分别记录。",
+            f"套件 SHA256：{independent.get('suite_sha256')}"]
+        check = independent.get('report')
+        if check:
+            lines.append(f"独立用例：{check['passed_count']}/{check['total']}")
+            for case in check.get('cases', []):
+                lines.append(f"- {case['id']} {case['description']}：{'通过' if case['passed'] else '未通过'}")
+                for step in case['steps']:
+                    if not step['passed']:
+                        lines.append(f"  失败差异：{step.get('difference') or step.get('error')}")
+    else:
+        lines.append('未执行独立评测；不能把流程验收通过当成独立评测通过。')
     durations = defaultdict(int)
     for e in state.get('events', []):
         if 'duration_ms' in e:

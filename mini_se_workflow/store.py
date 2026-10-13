@@ -19,11 +19,15 @@ def process_alive(pid: int) -> bool:
         kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
         kernel.OpenProcess.restype = wintypes.HANDLE
         kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
         handle = kernel.OpenProcess(0x1000, False, pid)
         if not handle:
             return ctypes.get_last_error() == 5  # Access denied is not evidence of a dead process.
-        kernel.CloseHandle(handle)
-        return True
+        try:
+            code = wintypes.DWORD()
+            return not kernel.GetExitCodeProcess(handle, ctypes.byref(code)) or code.value == 259
+        finally:
+            kernel.CloseHandle(handle)
     try:
         os.kill(pid, 0)
         return True

@@ -40,7 +40,15 @@
       "confirmed_specification": {},
       "requirement_history": [],
       "pending_artifact": {},
-      "confirmed_at": ""
+      "confirmed_at": "",
+      "independent_evaluation": {
+        "case_id": "todo",
+        "mode": "deepseek",
+        "expected": "project",
+        "success": false,
+        "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+        "report": null
+      }
     }
   },
   {
@@ -84,7 +92,15 @@
       "confirmed_specification": {},
       "requirement_history": [],
       "pending_artifact": {},
-      "confirmed_at": ""
+      "confirmed_at": "",
+      "independent_evaluation": {
+        "case_id": "grades",
+        "mode": "deepseek",
+        "expected": "project",
+        "success": false,
+        "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+        "report": null
+      }
     }
   },
   {
@@ -128,7 +144,15 @@
       "confirmed_specification": {},
       "requirement_history": [],
       "pending_artifact": {},
-      "confirmed_at": ""
+      "confirmed_at": "",
+      "independent_evaluation": {
+        "case_id": "ledger",
+        "mode": "deepseek",
+        "expected": "project",
+        "success": false,
+        "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+        "report": null
+      }
     }
   },
   {
@@ -172,7 +196,15 @@
       "confirmed_specification": {},
       "requirement_history": [],
       "pending_artifact": {},
-      "confirmed_at": ""
+      "confirmed_at": "",
+      "independent_evaluation": {
+        "case_id": "grades",
+        "mode": "deepseek",
+        "expected": "project",
+        "success": false,
+        "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+        "report": null
+      }
     }
   }
 ]

@@ -34,6 +34,7 @@ class WorkflowState:
     pending_artifact: dict[str, Any] = field(default_factory=dict)
     confirmed_at: str = ""
     owner_pid: int = 0
+    independent_evaluation: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

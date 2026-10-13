@@ -31,6 +31,11 @@ class EvaluationTests(unittest.TestCase):
             self.assertEqual(failed['id'], 'S4')
             self.assertEqual(json.loads(output.read_text(encoding='utf-8'))['metrics']['success'], 0)
             self.assertEqual(client.calls, 3)  # Holdout failures never get returned to the coder.
+            from mini_se_workflow.reporting import delivery_report
+            saved = RunStore(Path(temp)/'runs').load(result['run_id'])
+            self.assertEqual(saved['status'], 'approved')
+            self.assertFalse(saved['independent_evaluation']['success'])
+            self.assertIn('独立用例：3/4', delivery_report(saved))
 
     def test_first_pass_denominator_excludes_clarification(self):
         records = [dict(expected='project',success=True,repair_count=0,category='normal'),

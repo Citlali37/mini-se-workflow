@@ -130,6 +130,14 @@ class LifecycleTests(unittest.TestCase):
         self.store.recover_interrupted()
         self.assertEqual(self.store.load(state.run_id)['status'], 'running')
 
+    def test_exited_process_is_not_mistaken_for_live_owner(self):
+        import subprocess
+        import sys
+        from mini_se_workflow.store import process_alive
+        process = subprocess.Popen([sys.executable, '-c', 'pass'])
+        process.wait(timeout=5)
+        self.assertFalse(process_alive(process.pid))
+
     def test_exhausted_budget_and_legacy_records_cannot_bypass(self):
         workflow = MiniSEWorkflow(self.client, self.store, max_repairs=0)
         state = workflow.run(DEMO_TASK)

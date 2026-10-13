@@ -243,6 +243,17 @@
 +    return {"ok": False, "error": error_code}
 ```
 
+## 独立评测
+
+评测编号：text-stats；模式：deepseek
+评测结果：通过；与流程验收状态分别记录。
+套件 SHA256：f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086
+独立用例：4/4
+- S1 混合文本和连字符：通过
+- S2 空文本：通过
+- S3 Unicode 换行及下划线：通过
+- S4 布尔值、数组及缺少字段：通过
+
 ## 已记录阶段耗时
 
 - 需求 Agent：14214 ms
