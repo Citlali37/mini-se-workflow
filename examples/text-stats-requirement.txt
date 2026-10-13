@@ -1,0 +1,1 @@
+开发一个文本统计工具。每次从标准输入接收 JSON 对象，包含 text 字段，统计并返回：包含空格和换行的总字符数 characters；连续 ASCII 字母或数字组成的英文单词数 words（例如 hello-world 是2个词）；按 splitlines() 计算的行数 lines（空字符串为0行）。正常输出包含 ok:true 和这三个整数。空文本应成功返回三个0。text 缺失或不是字符串时返回 ok:false,error:"invalid_text"。不需要保存数据，也不需要联网。请提供中文、英文、空文本、换行和无效输入的验收用例。

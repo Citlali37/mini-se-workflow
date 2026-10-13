@@ -1,0 +1,246 @@
+{
+  "passed": true,
+  "source_checks": [
+    {
+      "file": "main.py",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "file": "protocol.py",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "file": "textstats.py",
+      "passed": true,
+      "errors": []
+    }
+  ],
+  "cases": [
+    {
+      "id": "E1",
+      "source": "requirements",
+      "description": "纯换行",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": "\n\n"
+          },
+          "expected": {
+            "ok": true,
+            "characters": 2,
+            "words": 0,
+            "lines": 2
+          },
+          "actual": {
+            "ok": true,
+            "characters": 2,
+            "words": 0,
+            "lines": 2
+          },
+          "stdout": "{\"ok\": true, \"characters\": 2, \"words\": 0, \"lines\": 2}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 66,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    },
+    {
+      "id": "E2",
+      "source": "requirements",
+      "description": "Unicode分隔符",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": "A B"
+          },
+          "expected": {
+            "ok": true,
+            "characters": 3,
+            "words": 2,
+            "lines": 2
+          },
+          "actual": {
+            "ok": true,
+            "characters": 3,
+            "words": 2,
+            "lines": 2
+          },
+          "stdout": "{\"ok\": true, \"characters\": 3, \"words\": 2, \"lines\": 2}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 64,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    },
+    {
+      "id": "E3",
+      "source": "requirements",
+      "description": "中文与英文数字混合",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": "中文abc123世界"
+          },
+          "expected": {
+            "ok": true,
+            "characters": 10,
+            "words": 1,
+            "lines": 1
+          },
+          "actual": {
+            "ok": true,
+            "characters": 10,
+            "words": 1,
+            "lines": 1
+          },
+          "stdout": "{\"ok\": true, \"characters\": 10, \"words\": 1, \"lines\": 1}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 63,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    },
+    {
+      "id": "E4",
+      "source": "requirements",
+      "description": "下划线不属于英文单词",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": "a_b-c"
+          },
+          "expected": {
+            "ok": true,
+            "characters": 5,
+            "words": 3,
+            "lines": 1
+          },
+          "actual": {
+            "ok": true,
+            "characters": 5,
+            "words": 3,
+            "lines": 1
+          },
+          "stdout": "{\"ok\": true, \"characters\": 5, \"words\": 3, \"lines\": 1}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 63,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    },
+    {
+      "id": "E5",
+      "source": "requirements",
+      "description": "拒绝布尔值与数组",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": true
+          },
+          "expected": {
+            "ok": false,
+            "error": "invalid_text"
+          },
+          "actual": {
+            "ok": false,
+            "error": "invalid_text"
+          },
+          "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 83,
+          "passed": true,
+          "difference": ""
+        },
+        {
+          "number": 2,
+          "input": {
+            "text": []
+          },
+          "expected": {
+            "ok": false,
+            "error": "invalid_text"
+          },
+          "actual": {
+            "ok": false,
+            "error": "invalid_text"
+          },
+          "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 63,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    },
+    {
+      "id": "E6",
+      "source": "requirements",
+      "description": "忽略额外字段",
+      "requirement_ids": [],
+      "passed": true,
+      "steps": [
+        {
+          "number": 1,
+          "input": {
+            "text": "  ",
+            "extra": 1
+          },
+          "expected": {
+            "ok": true,
+            "characters": 2,
+            "words": 0,
+            "lines": 1
+          },
+          "actual": {
+            "ok": true,
+            "characters": 2,
+            "words": 0,
+            "lines": 1
+          },
+          "stdout": "{\"ok\": true, \"characters\": 2, \"words\": 0, \"lines\": 1}\r\n",
+          "stderr": "",
+          "exit_code": 0,
+          "error": "",
+          "duration_ms": 64,
+          "passed": true,
+          "difference": ""
+        }
+      ]
+    }
+  ],
+  "total": 6,
+  "passed_count": 6
+}
