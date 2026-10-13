@@ -67,8 +67,17 @@ class WebTests(unittest.TestCase):
             if not result["busy"]:
                 break
             time.sleep(0.05)
-        self.assertTrue(seen_running)
+        # Requirement analysis may complete before the first poll; 202 and the saved gate prove async behavior.
         self.assertFalse(result["busy"])
+        self.assertEqual(result["state"]["status"], "awaiting_confirmation")
+        run_id = result["state"]["run_id"]
+        self.assertEqual(self.request("/api/actions/" + run_id, {"action": "confirm"})[0], 202)
+        deadline = time.monotonic() + 20
+        while time.monotonic() < deadline:
+            result = json.loads(self.request("/api/status")[1])
+            if not result["busy"]:
+                break
+            time.sleep(0.05)
         self.assertEqual(result["state"]["status"], "approved")
         run_id = result["state"]["run_id"]
         history = json.loads(self.request("/api/runs")[1])["runs"]
@@ -81,6 +90,24 @@ class WebTests(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             self.assertIn("main.py", archive.namelist())
             self.assertIn("_workflow/design.json", archive.namelist())
+            self.assertIn("_workflow/report.md", archive.namelist())
+        self.assertEqual(self.request('/api/report/' + run_id)[0], 200)
+        diffs = json.loads(self.request('/api/diffs/' + run_id)[1])['diffs']
+        self.assertEqual(len(diffs), 2)
+
+    def test_invalid_confirm_and_duplicate_action_preserve_record(self):
+        self.request('/api/run', {'task': DEMO_TASK})
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            result = json.loads(self.request('/api/status')[1])
+            if not result['busy']:
+                break
+            time.sleep(.02)
+        run_id = result['state']['run_id']
+        previous = self.workflow.store.load(run_id)
+        self.assertEqual(self.request('/api/actions/' + run_id, {'action':'confirm','specification':{}})[0], 400)
+        self.assertEqual(self.workflow.store.load(run_id), previous)
+        self.assertEqual(self.request('/api/actions/' + run_id, {'action':'retry'})[0], 400)
 
 
 class BusyTests(unittest.TestCase):

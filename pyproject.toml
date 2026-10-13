@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mini-se-workflow"
-version = "0.1.0"
+version = "0.2.0"
 description = "Requirements, design and coding agents with executable acceptance and bounded repair"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,4 +17,4 @@ mini-se-workflow = "mini_se_workflow.cli:main"
 include = ["mini_se_workflow*"]
 
 [tool.setuptools.package-data]
-mini_se_workflow = ["static/*.html", "fixtures/todo_project/*.py", "fixtures/todo_project/*.md"]
+mini_se_workflow = ["static/*.html", "fixtures/*.json", "fixtures/todo_project/*.py", "fixtures/todo_project/*.md"]

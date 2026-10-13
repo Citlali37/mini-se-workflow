@@ -1,0 +1,184 @@
+{
+  "mode": "failure-fixture",
+  "created_at": "2026-10-13T03:49:30+00:00",
+  "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+  "description": "离线固定响应或故障注入：仅验证评测与流程机制，不代表模型能力",
+  "results": [
+    {
+      "id": "text-stats",
+      "category": "boundary",
+      "expected": "project",
+      "run_id": "b61e73496a7c4754",
+      "status": "approved",
+      "success": false,
+      "repair_count": 0,
+      "error": "",
+      "independent": {
+        "passed": false,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "S1",
+            "source": "independent",
+            "description": "混合文本和连字符",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "你好 hello-world 123"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "stdout": "{\"ok\": true, \"characters\": 18, \"words\": 3, \"lines\": 1}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S2",
+            "source": "independent",
+            "description": "空文本",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": ""
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "stdout": "{\"ok\": true, \"characters\": 0, \"words\": 0, \"lines\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S3",
+            "source": "independent",
+            "description": "Unicode 换行及下划线",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "a_b 中"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "stdout": "{\"ok\": true, \"characters\": 5, \"words\": 2, \"lines\": 2}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S4",
+            "source": "independent",
+            "description": "布尔值、数组及缺少字段",
+            "requirement_ids": [],
+            "passed": false,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": true
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "stdout": "{\"ok\": true, \"characters\": 0, \"words\": 0, \"lines\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": false,
+                "difference": "$.ok 预期 False，实际 True。"
+              }
+            ]
+          }
+        ],
+        "total": 4,
+        "passed_count": 3
+      },
+      "questions": []
+    }
+  ],
+  "metrics": {
+    "success": 0,
+    "total": 1,
+    "success_rate": 0.0,
+    "project_count": 1,
+    "first_pass_count": 0,
+    "first_pass_rate": 0.0,
+    "repair_count": 0,
+    "by_category": {
+      "boundary": {
+        "success": 0,
+        "total": 1
+      }
+    }
+  },
+  "usage_records": [],
+  "http_request_count": 0
+}

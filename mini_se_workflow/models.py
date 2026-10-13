@@ -25,9 +25,27 @@ class WorkflowState:
     events: list[dict[str, Any]] = field(default_factory=list)
     repair_count: int = 0
     error: str = ""
+    next_step: str = "requirements"
+    example_id: str | None = None
+    max_repairs: int = 2
+    review_required: bool = False
+    confirmed_specification: dict[str, Any] = field(default_factory=dict)
+    requirement_history: list[dict[str, Any]] = field(default_factory=list)
+    pending_artifact: dict[str, Any] = field(default_factory=dict)
+    confirmed_at: str = ""
+    owner_pid: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict) -> "WorkflowState":
+        from dataclasses import fields
+        return cls(**{f.name: value[f.name] for f in fields(cls) if f.name in value})
+
+
+class WorkflowCancelled(RuntimeError):
+    pass
 
 
 class WorkflowExecutionError(RuntimeError):

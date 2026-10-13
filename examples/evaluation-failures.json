@@ -1,0 +1,178 @@
+[
+  {
+    "experiment": "evaluation-real.json",
+    "state": {
+      "run_id": "e81ac941482f47fa",
+      "task": "开发一个待办事项工具：支持新增、查看、完成和删除任务；使用本地 JSON 文件保存，重启后数据不丢失；任务编号从1递增且不复用，标题去除首尾空白，空标题和非文本标题都应拒绝。JSON 请求使用 action 字段：add 携带 title，list 查看列表，complete/delete 携带正整数 id（布尔值不算整数）。新增和完成成功返回 ok:true,task:{id,title,completed}；查看返回 ok:true,tasks 数组（按创建顺序）；删除返回 ok:true,deleted_id。新任务 completed 为 false，完成后为 true。失败返回 ok:false,error：空白或非文本标题为 empty_title，非法编号为 invalid_id，不存在的任务为 not_found，未知操作为 unknown_action。",
+      "mode": "deepseek",
+      "status": "failed",
+      "current_step": "requirements",
+      "created_at": "2026-10-13T03:36:53+00:00",
+      "specification": {},
+      "design": {},
+      "files": {},
+      "iterations": [],
+      "messages": [],
+      "events": [
+        {
+          "sequence": 1,
+          "time": "2026-10-13T03:36:53+00:00",
+          "step": "requirements",
+          "agent": "需求 Agent",
+          "status": "running",
+          "message": "正在整理需求和可执行验收条件。"
+        },
+        {
+          "sequence": 2,
+          "time": "2026-10-13T03:37:21+00:00",
+          "step": "requirements",
+          "agent": "Workflow",
+          "status": "failed",
+          "message": "用例步骤必须是数组，长度在 1 到 8 之间。"
+        }
+      ],
+      "repair_count": 0,
+      "error": "用例步骤必须是数组，长度在 1 到 8 之间。",
+      "next_step": "requirements",
+      "example_id": null,
+      "max_repairs": 2,
+      "review_required": false,
+      "confirmed_specification": {},
+      "requirement_history": [],
+      "pending_artifact": {},
+      "confirmed_at": ""
+    }
+  },
+  {
+    "experiment": "evaluation-real.json",
+    "state": {
+      "run_id": "5c5433c750e44b79",
+      "task": "开发成绩统计工具，JSON请求包含scores数组。只允许0至100的有限数值（布尔值不算数值）。非空有效数组返回ok:true,count,average（四舍五入保留2位）,minimum,maximum,passed（>=60的数量）。空数组返回ok:false,error:\"empty_scores\"；缺少scores、非数组或任何非法元素返回ok:false,error:\"invalid_scores\"。不存储，不联网。",
+      "mode": "deepseek",
+      "status": "failed",
+      "current_step": "requirements",
+      "created_at": "2026-10-13T03:38:04+00:00",
+      "specification": {},
+      "design": {},
+      "files": {},
+      "iterations": [],
+      "messages": [],
+      "events": [
+        {
+          "sequence": 1,
+          "time": "2026-10-13T03:38:04+00:00",
+          "step": "requirements",
+          "agent": "需求 Agent",
+          "status": "running",
+          "message": "正在整理需求和可执行验收条件。"
+        },
+        {
+          "sequence": 2,
+          "time": "2026-10-13T03:38:42+00:00",
+          "step": "requirements",
+          "agent": "Workflow",
+          "status": "failed",
+          "message": "DeepSeek 没有返回有效内容。"
+        }
+      ],
+      "repair_count": 0,
+      "error": "DeepSeek 没有返回有效内容。",
+      "next_step": "requirements",
+      "example_id": null,
+      "max_repairs": 2,
+      "review_required": false,
+      "confirmed_specification": {},
+      "requirement_history": [],
+      "pending_artifact": {},
+      "confirmed_at": ""
+    }
+  },
+  {
+    "experiment": "evaluation-real.json",
+    "state": {
+      "run_id": "099e21c585d44c91",
+      "task": "开发本地支出记账工具，数据JSON持久保存。请求action:add包含正整数amount（以分计，布尔值非法）及非空字符串category（去除首尾空白），返回ok:true,entry:{amount,category}；action:list返回ok:true,entries数组（创建顺序）；action:total返回ok:true,total（总金额整数，初始0）。非法金额返回ok:false,error:\"invalid_amount\"，非法分类返回ok:false,error:\"invalid_category\"，未知操作返回ok:false,error:\"unknown_action\"。每请求重启进程。",
+      "mode": "deepseek",
+      "status": "failed",
+      "current_step": "requirements",
+      "created_at": "2026-10-13T03:38:42+00:00",
+      "specification": {},
+      "design": {},
+      "files": {},
+      "iterations": [],
+      "messages": [],
+      "events": [
+        {
+          "sequence": 1,
+          "time": "2026-10-13T03:38:42+00:00",
+          "step": "requirements",
+          "agent": "需求 Agent",
+          "status": "running",
+          "message": "正在整理需求和可执行验收条件。"
+        },
+        {
+          "sequence": 2,
+          "time": "2026-10-13T03:39:02+00:00",
+          "step": "requirements",
+          "agent": "Workflow",
+          "status": "failed",
+          "message": "用例步骤必须是数组，长度在 1 到 8 之间。"
+        }
+      ],
+      "repair_count": 0,
+      "error": "用例步骤必须是数组，长度在 1 到 8 之间。",
+      "next_step": "requirements",
+      "example_id": null,
+      "max_repairs": 2,
+      "review_required": false,
+      "confirmed_specification": {},
+      "requirement_history": [],
+      "pending_artifact": {},
+      "confirmed_at": ""
+    }
+  },
+  {
+    "experiment": "evaluation-followup.json",
+    "state": {
+      "run_id": "134127d7746f43fe",
+      "task": "开发成绩统计工具，JSON请求包含scores数组。只允许0至100的有限数值（布尔值不算数值）。非空有效数组返回ok:true,count,average（四舍五入保留2位）,minimum,maximum,passed（>=60的数量）。空数组返回ok:false,error:\"empty_scores\"；缺少scores、非数组或任何非法元素返回ok:false,error:\"invalid_scores\"。不存储，不联网。",
+      "mode": "deepseek",
+      "status": "failed",
+      "current_step": "requirements",
+      "created_at": "2026-10-13T03:42:56+00:00",
+      "specification": {},
+      "design": {},
+      "files": {},
+      "iterations": [],
+      "messages": [],
+      "events": [
+        {
+          "sequence": 1,
+          "time": "2026-10-13T03:42:56+00:00",
+          "step": "requirements",
+          "agent": "需求 Agent",
+          "status": "running",
+          "message": "正在整理需求和可执行验收条件。"
+        },
+        {
+          "sequence": 2,
+          "time": "2026-10-13T03:43:24+00:00",
+          "step": "requirements",
+          "agent": "Workflow",
+          "status": "failed",
+          "message": "Out of range float values are not JSON compliant: nan"
+        }
+      ],
+      "repair_count": 0,
+      "error": "Out of range float values are not JSON compliant: nan",
+      "next_step": "requirements",
+      "example_id": null,
+      "max_repairs": 2,
+      "review_required": false,
+      "confirmed_specification": {},
+      "requirement_history": [],
+      "pending_artifact": {},
+      "confirmed_at": ""
+    }
+  }
+]

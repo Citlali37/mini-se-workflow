@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 from unittest.mock import patch
 
@@ -34,6 +35,13 @@ class RunnerTests(unittest.TestCase):
         result = AcceptanceRunner(step_timeout=0.2).run({"main.py": "while True:\n    pass\n"}, acceptance(step({}, {"ok": True})))
         self.assertFalse(result["passed"])
         self.assertIn("超时", result["cases"][0]["steps"][0]["error"])
+
+    def test_cancel_stops_running_validation_process(self):
+        from mini_se_workflow.models import WorkflowCancelled
+        started = time.monotonic()
+        with self.assertRaises(WorkflowCancelled):
+            AcceptanceRunner(step_timeout=10).run({'main.py':'while True:\n    pass\n'},
+                acceptance(step({}, {'ok':True})), should_cancel=lambda: time.monotonic()-started > .2)
 
     def test_output_limit_and_non_json_are_failures(self):
         for source in ('print("x" * 100000)\n', 'print("hello")\n', 'print("{} {}")\n', 'print("{\\"value\\": NaN}")\n'):

@@ -1,9 +1,36 @@
 from __future__ import annotations
 
 import io
+import os
 import json
 import re
 import zipfile
+from .models import timestamp
+from .reporting import delivery_report
+
+
+def process_alive(pid: int) -> bool:
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return ctypes.get_last_error() == 5  # Access denied is not evidence of a dead process.
+        kernel.CloseHandle(handle)
+        return True
+    try:
+        os.kill(pid, 0)
+        return True
+    except PermissionError:
+        return True
+    except ProcessLookupError:
+        return False
 from pathlib import Path
 
 
@@ -51,6 +78,20 @@ class RunStore:
                 continue
         return sorted(summaries, key=lambda s: s["created_at"] or "", reverse=True)[:50]
 
+    def recover_interrupted(self) -> None:
+        """Only call at service startup, when no worker owns these records."""
+        for path in self.root.glob("*/workflow.json"):
+            try:
+                state = self.load(path.parent.name)
+                if state.get("status") == "running" and not process_alive(state.get('owner_pid', 0)):
+                    state["status"] = "interrupted"
+                    state.setdefault("events", []).append({"sequence": len(state["events"]) + 1,
+                        "time": timestamp(), "step": state.get("current_step", "requirements"),
+                        "agent": "Workflow", "status": "interrupted", "message": "服务中断；可从已保存检查点显式恢复。"})
+                    self.save(state)
+            except (ValueError, OSError):
+                continue
+
     def archive(self, run_id: str) -> bytes:
         state = self.load(run_id)
         if state["status"] == "running" or not state["files"]:
@@ -62,4 +103,5 @@ class RunStore:
             archive.writestr("_workflow/workflow.json", json.dumps(state, ensure_ascii=False, indent=2))
             archive.writestr("_workflow/acceptance.json", json.dumps(state["specification"], ensure_ascii=False, indent=2))
             archive.writestr("_workflow/design.json", json.dumps(state["design"], ensure_ascii=False, indent=2))
+            archive.writestr("_workflow/report.md", delivery_report(state).encode("utf-8"))
         return stream.getvalue()

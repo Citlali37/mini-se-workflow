@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from .demo import DEMO_TASK
 from .models import WorkflowExecutionError
 from .workflow import MiniSEWorkflow
+from .reporting import delivery_report, revision_diffs
 
 
 class BusyError(RuntimeError):
@@ -23,6 +24,7 @@ class WebApp:
         self._state_lock = threading.Lock()
         self._state = None
         self._error = ""
+        self._cancel = threading.Event()
 
     def update(self, state: dict) -> None:
         with self._state_lock:
@@ -32,7 +34,7 @@ class WebApp:
         with self._state_lock:
             return {"ok": True, "busy": self._run_lock.locked(), "state": self._state, "error": self._error, "mode": self.workflow.mode}
 
-    def start(self, task: object, example_id: object = None) -> None:
+    def start(self, task: object, example_id: object = None, *, require_confirmation: bool = True) -> None:
         if not isinstance(task, str) or not task.strip() or len(task) > 6000:
             raise ValueError("需求必须是1到6000字符的文本。")
         if example_id not in (None, "todo"):
@@ -46,10 +48,12 @@ class WebApp:
         with self._state_lock:
             self._state = None
             self._error = ""
+        self._cancel.clear()
 
         def execute() -> None:
             try:
-                self.workflow.run(task, example_id=example_id, on_update=self.update)
+                self.workflow.run(task, example_id=example_id, on_update=self.update,
+                                  require_confirmation=require_confirmation, should_cancel=self._cancel.is_set)
             except WorkflowExecutionError as exc:
                 self.update(exc.state.to_dict())
                 with self._state_lock:
@@ -66,6 +70,38 @@ class WebApp:
             self._run_lock.release()
             raise
 
+    def resume(self, run_id: str, payload: dict) -> None:
+        if not self._run_lock.acquire(blocking=False):
+            raise BusyError("已有任务正在运行，请等待完成。")
+        try:
+            prepared = self.workflow.prepare_resume(run_id, action=payload.get("action", "retry"),
+                specification=payload.get("specification"), answer=payload.get("answer", ""))
+            self._cancel.clear()
+            with self._state_lock:
+                self._error = ""
+            # Persist before returning 202. Another request cannot race an unsaved transition.
+            self.workflow.store.save(prepared.to_dict())
+            self.update(prepared.to_dict())
+            def execute():
+                try:
+                    self.workflow._execute(prepared, self.update, self._cancel.is_set)
+                except WorkflowExecutionError as exc:
+                    self.update(exc.state.to_dict())
+                    with self._state_lock:
+                        self._error = str(exc)
+                finally:
+                    self._run_lock.release()
+            threading.Thread(target=execute, daemon=True).start()
+        except Exception:
+            self._run_lock.release()
+            raise
+
+    def cancel(self, run_id: str) -> None:
+        with self._state_lock:
+            if not self._run_lock.locked() or not self._state or self._state["run_id"] != run_id:
+                raise ValueError("只能取消当前正在运行的任务。")
+            self._cancel.set()
+
 
 class LocalServer(ThreadingHTTPServer):
     daemon_threads = True
@@ -73,6 +109,7 @@ class LocalServer(ThreadingHTTPServer):
 
 
 def create_server(workflow: MiniSEWorkflow, port: int = 8002) -> LocalServer:
+    workflow.store.recover_interrupted()
     app = WebApp(workflow)
     index = (Path(__file__).with_name("static") / "index.html").read_bytes()
 
@@ -117,6 +154,12 @@ def create_server(workflow: MiniSEWorkflow, port: int = 8002) -> LocalServer:
                     self.send_json(200, app.status())
                 elif path == "/api/runs":
                     self.send_json(200, {"ok": True, "runs": workflow.store.history()})
+                elif path.startswith("/api/diffs/"):
+                    self.send_json(200, {"ok": True, "diffs": revision_diffs(workflow.store.load(path.removeprefix("/api/diffs/")))})
+                elif path.startswith("/api/report/"):
+                    run_id = path.removeprefix("/api/report/")
+                    report = delivery_report(workflow.store.load(run_id))
+                    self.send_body(200, report.encode("utf-8"), "text/markdown; charset=utf-8", f"mini-se-{run_id}-report.md")
                 elif path.startswith("/api/runs/"):
                     self.send_json(200, {"ok": True, "state": workflow.store.load(path.removeprefix("/api/runs/"))})
                 elif path.startswith("/api/download/"):
@@ -142,12 +185,13 @@ def create_server(workflow: MiniSEWorkflow, port: int = 8002) -> LocalServer:
             if origin and origin != f"http://{self.headers['Host']}":
                 self.send_json(403, {"ok": False, "error": "请求来源无效。"})
                 return
-            if urlparse(self.path).path != "/api/run":
+            path = urlparse(self.path).path
+            if path != "/api/run" and not path.startswith("/api/actions/"):
                 self.send_json(404, {"ok": False, "error": "接口不存在。"})
                 return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
-                if not 1 <= length <= 32768:
+                if not 1 <= length <= 500000:
                     raise ValueError("请求体大小无效。")
                 if self.headers.get("Content-Type", "").split(";")[0].strip().lower() != "application/json":
                     raise ValueError("请提交 JSON 请求。")
@@ -155,10 +199,17 @@ def create_server(workflow: MiniSEWorkflow, port: int = 8002) -> LocalServer:
                 payload = json.loads(self.rfile.read(length).decode("utf-8"))
                 if not isinstance(payload, dict):
                     raise ValueError("请求必须是 JSON 对象。")
-                app.start(payload.get("task"), payload.get("example_id"))
+                if path == "/api/run":
+                    app.start(payload.get("task"), payload.get("example_id"))
+                elif payload.get("action") == "cancel":
+                    app.cancel(path.removeprefix("/api/actions/"))
+                else:
+                    app.resume(path.removeprefix("/api/actions/"), payload)
                 self.send_json(202, {"ok": True, "message": "任务已开始。"})
             except BusyError as exc:
                 self.send_json(409, {"ok": False, "error": str(exc)})
+            except FileNotFoundError as exc:
+                self.send_json(404, {"ok": False, "error": str(exc)})
             except (ValueError, UnicodeDecodeError) as exc:
                 self.send_json(400, {"ok": False, "error": str(exc)})
             except TimeoutError:

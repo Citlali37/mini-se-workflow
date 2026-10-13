@@ -9,6 +9,7 @@ import tempfile
 import time
 from pathlib import Path
 from typing import Callable
+from .models import WorkflowCancelled
 
 
 ALLOWED_IMPORTS = {
@@ -88,7 +89,7 @@ def stop_process(process: subprocess.Popen) -> None:
     process.wait(timeout=5)
 
 
-def execute_request(root: Path, request: dict, timeout: float) -> dict:
+def execute_request(root: Path, request: dict, timeout: float, should_cancel=None) -> dict:
     env = {key: os.environ[key] for key in ("SystemRoot", "WINDIR") if key in os.environ}
     env.update({"TEMP": str(root), "TMP": str(root), "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"})
     start = time.monotonic()
@@ -103,6 +104,8 @@ def execute_request(root: Path, request: dict, timeout: float) -> dict:
         error = ""
         try:
             while process.poll() is None:
+                if should_cancel and should_cancel():
+                    raise WorkflowCancelled("用户取消了验收。")
                 if time.monotonic() - start > timeout:
                     error = f"执行超时（{timeout:.1f} 秒）。"
                     stop_process(process)
@@ -142,7 +145,7 @@ class AcceptanceRunner:
         self.step_timeout = step_timeout
         self.round_timeout = round_timeout
 
-    def run(self, files: dict[str, str], cases: list[dict], on_case: Callable[[dict], None] | None = None) -> dict:
+    def run(self, files: dict[str, str], cases: list[dict], on_case: Callable[[dict], None] | None = None, *, should_cancel=None) -> dict:
         syntax = source_checks(files)
         report = {"passed": False, "source_checks": syntax, "cases": [], "total": len(cases), "passed_count": 0}
         if not syntax or any(not item["passed"] for item in syntax):
@@ -150,6 +153,8 @@ class AcceptanceRunner:
             return report
         deadline = time.monotonic() + self.round_timeout
         for case in cases:
+            if should_cancel and should_cancel():
+                raise WorkflowCancelled("用户取消了验收。")
             result = {"id": case["id"], "source": case.get("source", "requirements"), "description": case["description"], "requirement_ids": case.get("requirement_ids", []), "passed": True, "steps": []}
             # Every test starts from a clean project. Each step restarts main.py in the same directory.
             with tempfile.TemporaryDirectory(prefix="mini-se-check-") as temp:
@@ -161,7 +166,7 @@ class AcceptanceRunner:
                     if remaining <= 0:
                         execution = {"actual": None, "error": "本轮验收时间预算已用完。", "stdout": "", "stderr": ""}
                     else:
-                        execution = execute_request(root, step["input"], min(self.step_timeout, remaining))
+                        execution = execute_request(root, step["input"], min(self.step_timeout, remaining), should_cancel)
                     difference = execution["error"] or compare_json(execution["actual"], step["expected"])
                     result["steps"].append({"number": index, "input": step["input"], "expected": step["expected"], **execution, "passed": not difference, "difference": difference or ""})
                     if difference:

@@ -1,0 +1,1108 @@
+{
+  "mode": "fixture",
+  "created_at": "2026-10-13T03:35:49+00:00",
+  "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+  "description": "离线固定响应：仅验证评测与流程机制，不代表模型能力",
+  "results": [
+    {
+      "id": "todo",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "dc3bcff0b4cd42d1",
+      "status": "approved",
+      "success": true,
+      "repair_count": 1,
+      "error": "",
+      "independent": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "service.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "storage.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "B1",
+            "source": "independent",
+            "description": "中文标题去除空白；多个任务按顺序保存",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add",
+                  "title": "  完成课程作业  "
+                },
+                "expected": {
+                  "task": {
+                    "id": 1,
+                    "title": "完成课程作业"
+                  }
+                },
+                "actual": {
+                  "ok": true,
+                  "task": {
+                    "id": 1,
+                    "title": "完成课程作业",
+                    "completed": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"task\": {\"id\": 1, \"title\": \"完成课程作业\", \"completed\": false}}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add",
+                  "title": "复习"
+                },
+                "expected": {
+                  "task": {
+                    "id": 2
+                  }
+                },
+                "actual": {
+                  "ok": true,
+                  "task": {
+                    "id": 2,
+                    "title": "复习",
+                    "completed": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"task\": {\"id\": 2, \"title\": \"复习\", \"completed\": false}}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "list"
+                },
+                "expected": {
+                  "ok": true,
+                  "tasks": [
+                    {
+                      "id": 1,
+                      "title": "完成课程作业",
+                      "completed": false
+                    },
+                    {
+                      "id": 2,
+                      "title": "复习",
+                      "completed": false
+                    }
+                  ]
+                },
+                "actual": {
+                  "ok": true,
+                  "tasks": [
+                    {
+                      "id": 1,
+                      "title": "完成课程作业",
+                      "completed": false
+                    },
+                    {
+                      "id": 2,
+                      "title": "复习",
+                      "completed": false
+                    }
+                  ]
+                },
+                "stdout": "{\"ok\": true, \"tasks\": [{\"id\": 1, \"title\": \"完成课程作业\", \"completed\": false}, {\"id\": 2, \"title\": \"复习\", \"completed\": false}]}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "B2",
+            "source": "independent",
+            "description": "拒绝纯空白与非文本标题",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add",
+                  "title": " \t "
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "empty_title"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "empty_title"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"empty_title\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add",
+                  "title": 123
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "empty_title"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "empty_title"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"empty_title\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "list"
+                },
+                "expected": {
+                  "tasks": []
+                },
+                "actual": {
+                  "ok": true,
+                  "tasks": []
+                },
+                "stdout": "{\"ok\": true, \"tasks\": []}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "B3",
+            "source": "independent",
+            "description": "布尔值不能冒充任务编号",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add",
+                  "title": "保持未完成"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "task": {
+                    "id": 1,
+                    "title": "保持未完成",
+                    "completed": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"task\": {\"id\": 1, \"title\": \"保持未完成\", \"completed\": false}}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "complete",
+                  "id": true
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_id\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "list"
+                },
+                "expected": {
+                  "tasks": [
+                    {
+                      "id": 1,
+                      "completed": false
+                    }
+                  ]
+                },
+                "actual": {
+                  "ok": true,
+                  "tasks": [
+                    {
+                      "id": 1,
+                      "title": "保持未完成",
+                      "completed": false
+                    }
+                  ]
+                },
+                "stdout": "{\"ok\": true, \"tasks\": [{\"id\": 1, \"title\": \"保持未完成\", \"completed\": false}]}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 66,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "B4",
+            "source": "independent",
+            "description": "未知操作与删除不存在的任务",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "unknown"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"unknown_action\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "delete",
+                  "id": 999
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "not_found"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "not_found"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"not_found\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "list"
+                },
+                "expected": {
+                  "ok": true,
+                  "tasks": []
+                },
+                "actual": {
+                  "ok": true,
+                  "tasks": []
+                },
+                "stdout": "{\"ok\": true, \"tasks\": []}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 4,
+        "passed_count": 4
+      },
+      "questions": []
+    },
+    {
+      "id": "text-stats",
+      "category": "boundary",
+      "expected": "project",
+      "run_id": "0e0d7bd25dcd4e32",
+      "status": "approved",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "S1",
+            "source": "independent",
+            "description": "混合文本和连字符",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "你好 hello-world 123"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "stdout": "{\"ok\": true, \"characters\": 18, \"words\": 3, \"lines\": 1}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S2",
+            "source": "independent",
+            "description": "空文本",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": ""
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "stdout": "{\"ok\": true, \"characters\": 0, \"words\": 0, \"lines\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S3",
+            "source": "independent",
+            "description": "Unicode 换行及下划线",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "a_b 中"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "stdout": "{\"ok\": true, \"characters\": 5, \"words\": 2, \"lines\": 2}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S4",
+            "source": "independent",
+            "description": "布尔值、数组及缺少字段",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": true
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "text": []
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 65,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {},
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 4,
+        "passed_count": 4
+      },
+      "questions": []
+    },
+    {
+      "id": "grades",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "15b32792867c415f",
+      "status": "approved",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "G1",
+            "source": "independent",
+            "description": "正常成绩",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "scores": [
+                    50,
+                    70,
+                    90
+                  ]
+                },
+                "expected": {
+                  "ok": true,
+                  "count": 3,
+                  "average": 70,
+                  "minimum": 50,
+                  "maximum": 90,
+                  "passed": 2
+                },
+                "actual": {
+                  "ok": true,
+                  "count": 3,
+                  "average": 70.0,
+                  "minimum": 50,
+                  "maximum": 90,
+                  "passed": 2
+                },
+                "stdout": "{\"ok\": true, \"count\": 3, \"average\": 70.0, \"minimum\": 50, \"maximum\": 90, \"passed\": 2}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "G2",
+            "source": "independent",
+            "description": "上下边界",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "scores": [
+                    0,
+                    60,
+                    100
+                  ]
+                },
+                "expected": {
+                  "ok": true,
+                  "count": 3,
+                  "average": 53.33,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "passed": 2
+                },
+                "actual": {
+                  "ok": true,
+                  "count": 3,
+                  "average": 53.33,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "passed": 2
+                },
+                "stdout": "{\"ok\": true, \"count\": 3, \"average\": 53.33, \"minimum\": 0, \"maximum\": 100, \"passed\": 2}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "G3",
+            "source": "independent",
+            "description": "空与非法输入",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "scores": []
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "empty_scores"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "empty_scores"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"empty_scores\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 46,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "scores": [
+                    true,
+                    80
+                  ]
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_scores\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "scores": [
+                    101
+                  ]
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_scores\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {},
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_scores"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_scores\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 75,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 3,
+        "passed_count": 3
+      },
+      "questions": []
+    },
+    {
+      "id": "ledger",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "cded7ff2c7454a92",
+      "status": "approved",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "L1",
+            "source": "independent",
+            "description": "持久化和总金额",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "total"
+                },
+                "expected": {
+                  "ok": true,
+                  "total": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "total": 0
+                },
+                "stdout": "{\"ok\": true, \"total\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add",
+                  "amount": 125,
+                  "category": " 餐饮 "
+                },
+                "expected": {
+                  "ok": true,
+                  "entry": {
+                    "amount": 125,
+                    "category": "餐饮"
+                  }
+                },
+                "actual": {
+                  "ok": true,
+                  "entry": {
+                    "amount": 125,
+                    "category": "餐饮"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"entry\": {\"amount\": 125, \"category\": \"餐饮\"}}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "add",
+                  "amount": 75,
+                  "category": "交通"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "entry": {
+                    "amount": 75,
+                    "category": "交通"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"entry\": {\"amount\": 75, \"category\": \"交通\"}}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 65,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "list"
+                },
+                "expected": {
+                  "ok": true,
+                  "entries": [
+                    {
+                      "amount": 125,
+                      "category": "餐饮"
+                    },
+                    {
+                      "amount": 75,
+                      "category": "交通"
+                    }
+                  ]
+                },
+                "actual": {
+                  "ok": true,
+                  "entries": [
+                    {
+                      "amount": 125,
+                      "category": "餐饮"
+                    },
+                    {
+                      "amount": 75,
+                      "category": "交通"
+                    }
+                  ]
+                },
+                "stdout": "{\"ok\": true, \"entries\": [{\"amount\": 125, \"category\": \"餐饮\"}, {\"amount\": 75, \"category\": \"交通\"}]}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 5,
+                "input": {
+                  "action": "total"
+                },
+                "expected": {
+                  "ok": true,
+                  "total": 200
+                },
+                "actual": {
+                  "ok": true,
+                  "total": 200
+                },
+                "stdout": "{\"ok\": true, \"total\": 200}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "L2",
+            "source": "independent",
+            "description": "非法请求不改变数据",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add",
+                  "amount": true,
+                  "category": "餐饮"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_amount"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_amount"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_amount\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add",
+                  "amount": 1,
+                  "category": " "
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_category"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_category"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_category\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "wat"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"unknown_action\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "total"
+                },
+                "expected": {
+                  "ok": true,
+                  "total": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "total": 0
+                },
+                "stdout": "{\"ok\": true, \"total\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 2,
+        "passed_count": 2
+      },
+      "questions": []
+    },
+    {
+      "id": "ambiguous",
+      "category": "ambiguity",
+      "expected": "questions",
+      "run_id": "6800edafc0874007",
+      "status": "needs_input",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": null,
+      "questions": [
+        "请明确转换规则或调整项目范围。"
+      ]
+    },
+    {
+      "id": "unsupported",
+      "category": "out_of_scope",
+      "expected": "questions",
+      "run_id": "d67b353dd2cb4878",
+      "status": "needs_input",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": null,
+      "questions": [
+        "请明确转换规则或调整项目范围。"
+      ]
+    }
+  ],
+  "metrics": {
+    "success": 6,
+    "total": 6,
+    "success_rate": 1.0,
+    "project_count": 4,
+    "first_pass_count": 3,
+    "first_pass_rate": 0.75,
+    "repair_count": 1,
+    "by_category": {
+      "ambiguity": {
+        "success": 1,
+        "total": 1
+      },
+      "boundary": {
+        "success": 1,
+        "total": 1
+      },
+      "normal": {
+        "success": 3,
+        "total": 3
+      },
+      "out_of_scope": {
+        "success": 1,
+        "total": 1
+      }
+    }
+  },
+  "usage_records": [],
+  "http_request_count": 0
+}

@@ -56,18 +56,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--task-file", help="从 UTF-8 文本文件读取需求。")
     parser.add_argument("--example", choices=["todo"], help="使用示例需求及独立固定验收。")
     parser.add_argument("--output", default=str(ROOT / "outputs"), help="运行记录及项目输出目录。")
-    parser.add_argument("--max-repairs", type=int, choices=[0, 1, 2], default=2)
+    parser.add_argument("--max-repairs", type=int, choices=range(6), default=2)
+    parser.add_argument("--review", action="store_true", help="在需求确认前暂停。")
+    parser.add_argument("--resume", help="继续已有运行编号。")
+    parser.add_argument("--action", choices=["retry", "confirm", "clarify"], default="retry")
+    parser.add_argument("--spec-file", help="确认时使用修改后的规格 JSON。")
+    parser.add_argument("--answer", default="", help="补充待确认问题的答案。")
     parser.add_argument("--export", help="命令行运行后把项目打包到指定 ZIP 路径。")
     args = parser.parse_args(argv)
     if args.open_browser and not args.web:
         parser.error("--open-browser 需要 --web。")
-    if args.web and any((args.task, args.task_file, args.example, args.export)):
+    if args.web and any((args.task, args.task_file, args.example, args.export, args.resume, args.review, args.spec_file, args.answer)):
         parser.error("Web 模式请在页面输入需求。")
-    if sum(bool(v) for v in (args.task, args.task_file, args.example)) > 1:
+    if sum(bool(v) for v in (args.task, args.task_file, args.example, args.resume)) > 1:
         parser.error("--task、--task-file、--example 只能选一个。")
     if not 0 <= args.port <= 65535:
         parser.error("端口必须在0到65535之间。")
-    if not args.web and not any((args.task, args.task_file, args.example, args.demo)):
+    if (args.spec_file or args.answer or args.action != "retry") and not args.resume:
+        parser.error("--action、--spec-file、--answer 需要 --resume。")
+    if not args.web and not any((args.task, args.task_file, args.example, args.demo, args.resume)):
         parser.error("请提供 --task、--task-file 或 --example todo。")
     try:
         workflow = create_workflow(args)
@@ -83,7 +90,13 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"[{event['sequence']}] {event['agent']}：{event['message']}", flush=True)
             previous = len(state["events"])
 
-        state = workflow.run(task, example_id="todo" if args.example or (args.demo and task.strip() == DEMO_TASK) else None, on_update=display)
+        if args.resume:
+            import json
+            spec = json.loads(Path(args.spec_file).read_text(encoding="utf-8-sig")) if args.spec_file else None
+            state = workflow.resume(args.resume, action=args.action, specification=spec, answer=args.answer, on_update=display)
+        else:
+            state = workflow.run(task, example_id="todo" if args.example or (args.demo and task.strip() == DEMO_TASK) else None,
+                                 on_update=display, require_confirmation=args.review)
         print(f"\n运行编号：{state.run_id}\n最终状态：{state.status}\n输出目录：{workflow.store.directory(state.run_id)}")
         for question in state.specification.get("questions", []):
             print(f"待确认：{question}")

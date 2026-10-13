@@ -1,0 +1,505 @@
+[
+  {
+    "id": "todo",
+    "category": "normal",
+    "task": "开发一个待办事项工具：支持新增、查看、完成和删除任务；使用本地 JSON 文件保存，重启后数据不丢失；任务编号从1递增且不复用，标题去除首尾空白，空标题和非文本标题都应拒绝。JSON 请求使用 action 字段：add 携带 title，list 查看列表，complete/delete 携带正整数 id（布尔值不算整数）。新增和完成成功返回 ok:true,task:{id,title,completed}；查看返回 ok:true,tasks 数组（按创建顺序）；删除返回 ok:true,deleted_id。新任务 completed 为 false，完成后为 true。失败返回 ok:false,error：空白或非文本标题为 empty_title，非法编号为 invalid_id，不存在的任务为 not_found，未知操作为 unknown_action。",
+    "expected": "project",
+    "checks": [
+      {
+        "id": "B1",
+        "requirement_ids": [],
+        "description": "中文标题去除空白；多个任务按顺序保存",
+        "steps": [
+          {
+            "input": {
+              "action": "add",
+              "title": "  完成课程作业  "
+            },
+            "expected": {
+              "task": {
+                "id": 1,
+                "title": "完成课程作业"
+              }
+            }
+          },
+          {
+            "input": {
+              "action": "add",
+              "title": "复习"
+            },
+            "expected": {
+              "task": {
+                "id": 2
+              }
+            }
+          },
+          {
+            "input": {
+              "action": "list"
+            },
+            "expected": {
+              "ok": true,
+              "tasks": [
+                {
+                  "id": 1,
+                  "title": "完成课程作业",
+                  "completed": false
+                },
+                {
+                  "id": 2,
+                  "title": "复习",
+                  "completed": false
+                }
+              ]
+            }
+          }
+        ],
+        "source": "independent"
+      },
+      {
+        "id": "B2",
+        "requirement_ids": [],
+        "description": "拒绝纯空白与非文本标题",
+        "steps": [
+          {
+            "input": {
+              "action": "add",
+              "title": " \t "
+            },
+            "expected": {
+              "ok": false,
+              "error": "empty_title"
+            }
+          },
+          {
+            "input": {
+              "action": "add",
+              "title": 123
+            },
+            "expected": {
+              "ok": false,
+              "error": "empty_title"
+            }
+          },
+          {
+            "input": {
+              "action": "list"
+            },
+            "expected": {
+              "tasks": []
+            }
+          }
+        ],
+        "source": "independent"
+      },
+      {
+        "id": "B3",
+        "requirement_ids": [],
+        "description": "布尔值不能冒充任务编号",
+        "steps": [
+          {
+            "input": {
+              "action": "add",
+              "title": "保持未完成"
+            },
+            "expected": {
+              "ok": true
+            }
+          },
+          {
+            "input": {
+              "action": "complete",
+              "id": true
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_id"
+            }
+          },
+          {
+            "input": {
+              "action": "list"
+            },
+            "expected": {
+              "tasks": [
+                {
+                  "id": 1,
+                  "completed": false
+                }
+              ]
+            }
+          }
+        ],
+        "source": "independent"
+      },
+      {
+        "id": "B4",
+        "requirement_ids": [],
+        "description": "未知操作与删除不存在的任务",
+        "steps": [
+          {
+            "input": {
+              "action": "unknown"
+            },
+            "expected": {
+              "ok": false,
+              "error": "unknown_action"
+            }
+          },
+          {
+            "input": {
+              "action": "delete",
+              "id": 999
+            },
+            "expected": {
+              "ok": false,
+              "error": "not_found"
+            }
+          },
+          {
+            "input": {
+              "action": "list"
+            },
+            "expected": {
+              "ok": true,
+              "tasks": []
+            }
+          }
+        ],
+        "source": "independent"
+      }
+    ]
+  },
+  {
+    "id": "text-stats",
+    "category": "boundary",
+    "task": "开发一个文本统计工具。每次从标准输入接收 JSON 对象，包含 text 字段，统计并返回：包含空格和换行的总字符数 characters；连续 ASCII 字母或数字组成的英文单词数 words（例如 hello-world 是2个词）；按 splitlines() 计算的行数 lines（空字符串为0行）。正常输出包含 ok:true 和这三个整数。空文本应成功返回三个0。text 缺失或不是字符串时返回 ok:false,error:\"invalid_text\"。不需要保存数据，也不需要联网。请提供中文、英文、空文本、换行和无效输入的验收用例。\n",
+    "expected": "project",
+    "checks": [
+      {
+        "id": "S1",
+        "description": "混合文本和连字符",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "text": "你好 hello-world 123"
+            },
+            "expected": {
+              "ok": true,
+              "characters": 18,
+              "words": 3,
+              "lines": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "S2",
+        "description": "空文本",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "text": ""
+            },
+            "expected": {
+              "ok": true,
+              "characters": 0,
+              "words": 0,
+              "lines": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "S3",
+        "description": "Unicode 换行及下划线",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "text": "a_b 中"
+            },
+            "expected": {
+              "ok": true,
+              "characters": 5,
+              "words": 2,
+              "lines": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "S4",
+        "description": "布尔值、数组及缺少字段",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "text": true
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_text"
+            }
+          },
+          {
+            "input": {
+              "text": []
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_text"
+            }
+          },
+          {
+            "input": {},
+            "expected": {
+              "ok": false,
+              "error": "invalid_text"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "grades",
+    "category": "normal",
+    "task": "开发成绩统计工具，JSON请求包含scores数组。只允许0至100的有限数值（布尔值不算数值）。非空有效数组返回ok:true,count,average（四舍五入保留2位）,minimum,maximum,passed（>=60的数量）。空数组返回ok:false,error:\"empty_scores\"；缺少scores、非数组或任何非法元素返回ok:false,error:\"invalid_scores\"。不存储，不联网。",
+    "expected": "project",
+    "checks": [
+      {
+        "id": "G1",
+        "description": "正常成绩",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "scores": [
+                50,
+                70,
+                90
+              ]
+            },
+            "expected": {
+              "ok": true,
+              "count": 3,
+              "average": 70,
+              "minimum": 50,
+              "maximum": 90,
+              "passed": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "G2",
+        "description": "上下边界",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "scores": [
+                0,
+                60,
+                100
+              ]
+            },
+            "expected": {
+              "ok": true,
+              "count": 3,
+              "average": 53.33,
+              "minimum": 0,
+              "maximum": 100,
+              "passed": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "G3",
+        "description": "空与非法输入",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "scores": []
+            },
+            "expected": {
+              "ok": false,
+              "error": "empty_scores"
+            }
+          },
+          {
+            "input": {
+              "scores": [
+                true,
+                80
+              ]
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_scores"
+            }
+          },
+          {
+            "input": {
+              "scores": [
+                101
+              ]
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_scores"
+            }
+          },
+          {
+            "input": {},
+            "expected": {
+              "ok": false,
+              "error": "invalid_scores"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ledger",
+    "category": "normal",
+    "task": "开发本地支出记账工具，数据JSON持久保存。请求action:add包含正整数amount（以分计，布尔值非法）及非空字符串category（去除首尾空白），返回ok:true,entry:{amount,category}；action:list返回ok:true,entries数组（创建顺序）；action:total返回ok:true,total（总金额整数，初始0）。非法金额返回ok:false,error:\"invalid_amount\"，非法分类返回ok:false,error:\"invalid_category\"，未知操作返回ok:false,error:\"unknown_action\"。每请求重启进程。",
+    "expected": "project",
+    "checks": [
+      {
+        "id": "L1",
+        "description": "持久化和总金额",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "action": "total"
+            },
+            "expected": {
+              "ok": true,
+              "total": 0
+            }
+          },
+          {
+            "input": {
+              "action": "add",
+              "amount": 125,
+              "category": " 餐饮 "
+            },
+            "expected": {
+              "ok": true,
+              "entry": {
+                "amount": 125,
+                "category": "餐饮"
+              }
+            }
+          },
+          {
+            "input": {
+              "action": "add",
+              "amount": 75,
+              "category": "交通"
+            },
+            "expected": {
+              "ok": true
+            }
+          },
+          {
+            "input": {
+              "action": "list"
+            },
+            "expected": {
+              "ok": true,
+              "entries": [
+                {
+                  "amount": 125,
+                  "category": "餐饮"
+                },
+                {
+                  "amount": 75,
+                  "category": "交通"
+                }
+              ]
+            }
+          },
+          {
+            "input": {
+              "action": "total"
+            },
+            "expected": {
+              "ok": true,
+              "total": 200
+            }
+          }
+        ]
+      },
+      {
+        "id": "L2",
+        "description": "非法请求不改变数据",
+        "source": "independent",
+        "steps": [
+          {
+            "input": {
+              "action": "add",
+              "amount": true,
+              "category": "餐饮"
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_amount"
+            }
+          },
+          {
+            "input": {
+              "action": "add",
+              "amount": 1,
+              "category": " "
+            },
+            "expected": {
+              "ok": false,
+              "error": "invalid_category"
+            }
+          },
+          {
+            "input": {
+              "action": "wat"
+            },
+            "expected": {
+              "ok": false,
+              "error": "unknown_action"
+            }
+          },
+          {
+            "input": {
+              "action": "total"
+            },
+            "expected": {
+              "ok": true,
+              "total": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ambiguous",
+    "category": "ambiguity",
+    "task": "开发一个数字转换工具，输入JSON包含value整数，输出JSON包含result整数。核心转换规则还没有决定，是加一、平方还是取绝对值，请先问我选哪一个，禁止自行假定。",
+    "expected": "questions",
+    "checks": []
+  },
+  {
+    "id": "unsupported",
+    "category": "out_of_scope",
+    "task": "开发联网视频会议系统，必须使用第三方SDK、实时访问公网并执行系统命令安装依赖；这些是不可替代的核心要求。请指出与当前Python标准库本地JSON工具范围不符，不得编造本地替代项目。",
+    "expected": "questions",
+    "checks": []
+  }
+]

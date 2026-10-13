@@ -1,0 +1,455 @@
+{
+  "mode": "deepseek",
+  "created_at": "2026-10-13T03:36:53+00:00",
+  "suite_sha256": "f22a78767b4489175e090ba2259c9a8bfce40f25e16effcffb910798b4a8f086",
+  "description": "真实模型；独立用例不传给编码或返工节点；每需求仅一次流程",
+  "results": [
+    {
+      "id": "todo",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "e81ac941482f47fa",
+      "status": "failed",
+      "success": false,
+      "repair_count": 0,
+      "error": "用例步骤必须是数组，长度在 1 到 8 之间。",
+      "independent": null,
+      "questions": []
+    },
+    {
+      "id": "text-stats",
+      "category": "boundary",
+      "expected": "project",
+      "run_id": "c2f2d39fdc834073",
+      "status": "approved",
+      "success": true,
+      "repair_count": 1,
+      "error": "",
+      "independent": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "text_stats.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "S1",
+            "source": "independent",
+            "description": "混合文本和连字符",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "你好 hello-world 123"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 18,
+                  "words": 3,
+                  "lines": 1
+                },
+                "stdout": "{\"ok\": true, \"characters\": 18, \"words\": 3, \"lines\": 1}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 73,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S2",
+            "source": "independent",
+            "description": "空文本",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": ""
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 0,
+                  "words": 0,
+                  "lines": 0
+                },
+                "stdout": "{\"ok\": true, \"characters\": 0, \"words\": 0, \"lines\": 0}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S3",
+            "source": "independent",
+            "description": "Unicode 换行及下划线",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": "a_b 中"
+                },
+                "expected": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "actual": {
+                  "ok": true,
+                  "characters": 5,
+                  "words": 2,
+                  "lines": 2
+                },
+                "stdout": "{\"ok\": true, \"characters\": 5, \"words\": 2, \"lines\": 2}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 65,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S4",
+            "source": "independent",
+            "description": "布尔值、数组及缺少字段",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "text": true
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "text": []
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 63,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {},
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_text"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_text\"}\r\n",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 4,
+        "passed_count": 4
+      },
+      "questions": []
+    },
+    {
+      "id": "grades",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "5c5433c750e44b79",
+      "status": "failed",
+      "success": false,
+      "repair_count": 0,
+      "error": "DeepSeek 没有返回有效内容。",
+      "independent": null,
+      "questions": []
+    },
+    {
+      "id": "ledger",
+      "category": "normal",
+      "expected": "project",
+      "run_id": "099e21c585d44c91",
+      "status": "failed",
+      "success": false,
+      "repair_count": 0,
+      "error": "用例步骤必须是数组，长度在 1 到 8 之间。",
+      "independent": null,
+      "questions": []
+    },
+    {
+      "id": "ambiguous",
+      "category": "ambiguity",
+      "expected": "questions",
+      "run_id": "2302566949af4934",
+      "status": "needs_input",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": null,
+      "questions": [
+        "核心转换规则请择一确认：(a) 加一 result = value + 1；(b) 平方 result = value * value；(c) 取绝对值 result = abs(value)？若为其他规则请给出精确表达式。",
+        "value 的取值类型与范围如何限定？例如是否只接受 -1000000 到 1000000 的整数，超出范围时返回什么错误码（如 value_out_of_range）？",
+        "输入不是合法 JSON、缺少 value 字段或 value 不是整数时，是否统一返回 {\"ok\": false, \"error\": \"...\"}？请确认各情况对应的错误字符串（如 invalid_json / missing_value / invalid_value）。",
+        "输出除 ok 与 result 外是否还需要其它字段（如 echoed input）？成功响应的确切形态是 {\"ok\": true, \"result\": <整数>} 吗？"
+      ]
+    },
+    {
+      "id": "unsupported",
+      "category": "out_of_scope",
+      "expected": "questions",
+      "run_id": "5cbf871440644075",
+      "status": "needs_input",
+      "success": true,
+      "repair_count": 0,
+      "error": "",
+      "independent": null,
+      "questions": [
+        "请确认：是否需要把本项目范围改为允许网络访问、第三方依赖与系统命令安装（例如放宽为通用 Python 应用）？若是，请给出新的范围约束与允许的依赖清单。",
+        "若不改变范围，请提供可在「纯标准库、本地、无网络、无子进程、单进程单次 JSON 请求」下交付的具体功能目标（例如：基于本地文件的会议元数据/日程/参与人列表管理、消息队列的本地模拟与状态查询等），并说明输入输出与持久化位置。",
+        "请说明该工具的调用方与数据流：除 stdin 输入 JSON 外，是否需要读写当前工作目录下的哪些相对路径文件？是否需要跨请求持久化状态？",
+        "请明确错误场景与期望的错误码集合（例如缺少字段、字段类型错误、记录不存在），以及 success/error 响应的字段结构。",
+        "若确实需要视频会议能力，请确认是否接受将本项目仅交付为「不联网的协议/数据结构校验与配置生成组件」，且不包含任何实时音视频或网络传输功能？"
+      ]
+    }
+  ],
+  "metrics": {
+    "success": 3,
+    "total": 6,
+    "success_rate": 0.5,
+    "project_count": 4,
+    "first_pass_count": 0,
+    "first_pass_rate": 0.0,
+    "repair_count": 1,
+    "by_category": {
+      "ambiguity": {
+        "success": 1,
+        "total": 1
+      },
+      "boundary": {
+        "success": 1,
+        "total": 1
+      },
+      "normal": {
+        "success": 0,
+        "total": 3
+      },
+      "out_of_scope": {
+        "success": 1,
+        "total": 1
+      }
+    }
+  },
+  "usage_records": [
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 612,
+        "completion_tokens": 5506,
+        "total_tokens": 6118,
+        "prompt_tokens_details": {
+          "cached_tokens": 384
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1451
+        },
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 228
+      },
+      "request_number": 1
+    },
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 571,
+        "completion_tokens": 2680,
+        "total_tokens": 3251,
+        "prompt_tokens_details": {
+          "cached_tokens": 384
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1225
+        },
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 187
+      },
+      "request_number": 2
+    },
+    {
+      "agent": "design",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 1618,
+        "completion_tokens": 1631,
+        "total_tokens": 3249,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 347
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 1490
+      },
+      "request_number": 3
+    },
+    {
+      "agent": "coding",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 3044,
+        "completion_tokens": 2230,
+        "total_tokens": 5274,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 226
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 2916
+      },
+      "request_number": 4
+    },
+    {
+      "agent": "coding",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 3103,
+        "completion_tokens": 3002,
+        "total_tokens": 6105,
+        "prompt_tokens_details": {
+          "cached_tokens": 2944
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 931
+        },
+        "prompt_cache_hit_tokens": 2944,
+        "prompt_cache_miss_tokens": 159
+      },
+      "request_number": 5
+    },
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 566,
+        "completion_tokens": 4644,
+        "total_tokens": 5210,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2813
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 310
+      },
+      "request_number": 7
+    },
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 481,
+        "completion_tokens": 397,
+        "total_tokens": 878,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 137
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 225
+      },
+      "request_number": 8
+    },
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 487,
+        "completion_tokens": 517,
+        "total_tokens": 1004,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 162
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 231
+      },
+      "request_number": 9
+    }
+  ],
+  "http_request_count": 9
+}
