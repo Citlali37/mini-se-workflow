@@ -48,7 +48,8 @@ def delivery_report(state: dict) -> str:
                     if not step['passed']:
                         lines.append(f"- {case['id']}：{step.get('difference') or step.get('error')}")
         for change in changes['changes']:
-            lines += ['', f"文件：{change['file']}（{change['kind']}）", '```diff', change['diff'].rstrip(), '```']
+            display_diff = '\n'.join(line.rstrip() for line in change['diff'].splitlines())
+            lines += ['', f"文件：{change['file']}（{change['kind']}）", '```diff', display_diff, '```']
     independent = state.get('independent_evaluation', {})
     lines += ['', '## 独立评测', '']
     if independent:

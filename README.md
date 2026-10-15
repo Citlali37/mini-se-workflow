@@ -178,3 +178,34 @@ py -3 -X utf8 -m mini_se_workflow.evaluation --real --output outputs/evaluation-
 六项评测覆盖正常、边界、歧义和超范围。独立用例预先固定，不发给编码 Agent，也不作为返工反馈；报告保存失败输入输出和套件哈希。离线固定响应只能验证机制。首轮真实结果、定向复测及费用说明见 `examples/评测说明.md`，不能把两次实验拼成六项全通过的成绩。
 
 GitHub Actions 在 push/PR 时测试 Windows/Linux、Python 3.10/3.13，不使用真实模型密钥。升级要求、进展、验收依据和已知限制集中记录在 `项目进展.md`。
+
+## 图书案例的独立审查
+
+`examples/library-audit/` 保存原始真实模型运行、原始代码、审查修订代码、逐步结果和说明。原运行 `5452d526da7047cf` 的8/8记录保持不变。21项独立检查分为原需求业务复核9项、补充质量要求12项；原版9/21，修订版21/21，两者均通过原8项回归。
+
+补充要求包括必填姓名/书名、空白编号、日期溢出、损坏文件不能重置、写入失败保留原字节。独立执行器支持受限的初始数据夹具和文件SHA256不变断言，能检验“报错却偷偷改了数据”，不只检查JSON响应。
+
+在源码目录复现，不调用模型：
+
+```powershell
+py -3 -X utf8 -m mini_se_workflow.library_audit --output outputs/library-audit.json
+# 可选：向历史列表新增明确标注的审查修订记录，不覆盖原记录
+py -3 -X utf8 -m mini_se_workflow.library_audit --publish
+```
+
+修订代码由本次开发助手按审查发现直接修改，界面标注“人工审查修订”，表示独立于Mini SE内三个Agent的开发干预，不代表工作流自动修复，也不声称用户逐行手写。下载成品见 `examples/library-reviewed.zip`。后续生成所用设计/编码提示也加入相同通用质量原则，提示不等于质量保证。
+
+## 单 Agent 对照
+
+预注册条件及费用估算在 `examples/单Agent对照方案.md`，固定三个任务、每方案两次重复、相同开发测试和最多两次返工，独立测试不参与反馈。先查看原始结果，再讨论收益，不预设多Agent更优。
+
+```powershell
+# 无密钥：只测试实验机制
+py -3 -X utf8 -m mini_se_workflow.comparison --repeats 1
+# 真实实验会产生费用，须先估算；参考预注册方案
+py -3 -X utf8 -m mini_se_workflow.comparison --real --repeats 2 --request-limit 60 --max-tokens 16384 --output outputs/comparison-real.json
+```
+
+真实实验的完整记录在 `examples/comparison-real.json`，每个失败都保留在分母。运行记录在 `outputs/comparison/runs/`，避免与普通Web任务混淆。时间包括失败提前停止和本地验收，失败更快不意味着成功生成更快；token费用是服务已返回用量的估算，不是完整账单。课堂讲解见 `答辩说明.md`。
+
+本次真实对照为单Agent5/6、三Agent1/6，详细结果与限制见 `examples/comparison-real.md`。可用 `py -3 -X utf8 -m mini_se_workflow.experiment_report examples/comparison-real.json` 从已有结果重导出报告，不再次调用模型。

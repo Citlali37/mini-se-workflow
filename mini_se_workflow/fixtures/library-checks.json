@@ -1,0 +1,1000 @@
+[
+  {
+    "id": "C1",
+    "group": "original",
+    "source": "independent",
+    "description": "重复编号不覆盖原值、跨闰月应还日期",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 2
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "错误覆盖",
+          "total_copies": 8
+        },
+        "expected": {
+          "ok": false,
+          "error": "duplicate_book_id"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "覆盖"
+        },
+        "expected": {
+          "ok": false,
+          "error": "duplicate_reader_id"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true,
+          "available_copies": 1,
+          "record": {
+            "due_date": "2024-03-13",
+            "returned": false
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "C2",
+    "group": "original",
+    "source": "independent",
+    "description": "库存耗尽不写入，其他读者不能借出",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R2",
+          "name": "R2"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true,
+          "available_copies": 0
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R2",
+          "borrow_date": "2024-03-01"
+        },
+        "expected": {
+          "ok": false,
+          "error": "no_copies_available"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "list_borrowed",
+          "reader_id": "R2"
+        },
+        "expected": {
+          "ok": true,
+          "borrows": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "C3",
+    "group": "original",
+    "source": "independent",
+    "description": "重复借阅、重复归还拒绝，归还后可再次借出",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 2
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-03-01"
+        },
+        "expected": {
+          "ok": false,
+          "error": "already_borrowed"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "return_book",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "return_date": "2024-03-02"
+        },
+        "expected": {
+          "ok": true,
+          "available_copies": 2
+        }
+      },
+      {
+        "input": {
+          "action": "return_book",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "return_date": "2024-03-03"
+        },
+        "expected": {
+          "ok": false,
+          "error": "not_borrowed"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-03-04"
+        },
+        "expected": {
+          "ok": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "C4",
+    "group": "original",
+    "source": "independent",
+    "description": "应还当日不逾期，次日逾期且按读者过滤",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 2
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R2",
+          "name": "R2"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-03-13"
+        },
+        "expected": {
+          "ok": true,
+          "overdue": []
+        }
+      },
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-03-14"
+        },
+        "expected": {
+          "ok": true,
+          "overdue": [
+            {
+              "book_id": "B1",
+              "reader_id": "R1",
+              "due_date": "2024-03-13"
+            }
+          ]
+        }
+      },
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-03-14",
+          "reader_id": "R2"
+        },
+        "expected": {
+          "ok": true,
+          "overdue": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "C5",
+    "group": "original",
+    "source": "independent",
+    "description": "不同图书互不影响，跨进程保持借阅顺序",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B2",
+          "title": "书B",
+          "total_copies": 2
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B2",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "list_borrowed",
+          "reader_id": "R1"
+        },
+        "expected": {
+          "ok": true,
+          "borrows": [
+            {
+              "book_id": "B2",
+              "title": "书B"
+            },
+            {
+              "book_id": "B1",
+              "title": "书A"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "C6",
+    "group": "original",
+    "source": "independent",
+    "description": "错误日期、未知图书与读者不改变库存",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2023-02-29"
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_date"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "X",
+          "reader_id": "R1",
+          "borrow_date": "2024-01-01"
+        },
+        "expected": {
+          "ok": false,
+          "error": "book_not_found"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "X",
+          "borrow_date": "2024-01-01"
+        },
+        "expected": {
+          "ok": false,
+          "error": "reader_not_found"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-02-28"
+        },
+        "expected": {
+          "ok": true,
+          "available_copies": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "C7",
+    "group": "original",
+    "source": "independent",
+    "description": "布尔值不能充当库存或编号",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": true
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_total_copies"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": true,
+          "name": "甲"
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_id"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "unknown"
+        },
+        "expected": {
+          "ok": false,
+          "error": "unknown_action"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "C8",
+    "group": "original",
+    "source": "independent",
+    "description": "不存在读者不能查询",
+    "steps": [
+      {
+        "input": {
+          "action": "list_borrowed",
+          "reader_id": "X"
+        },
+        "expected": {
+          "ok": false,
+          "error": "reader_not_found"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-01-01",
+          "reader_id": "X"
+        },
+        "expected": {
+          "ok": false,
+          "error": "reader_not_found"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V1",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "缺少书名必须拒绝",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_title"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V2",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "空白和非文本书名必须拒绝",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": " \t ",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_title"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": 3,
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_title"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V3",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "缺少读者姓名必须拒绝",
+    "steps": [
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1"
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_name"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V4",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "空白和非文本姓名必须拒绝",
+    "steps": [
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": " \t "
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_name"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": []
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_name"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V5",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "纯空白编号必须拒绝",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": " \t ",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_id"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "  ",
+          "name": "甲"
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_id"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V6",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "日期溢出返回错误而非崩溃",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "9999-12-31"
+        },
+        "expected": {
+          "ok": false,
+          "error": "invalid_date"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "V7",
+    "group": "original",
+    "source": "independent",
+    "description": "保留原规格的还书日期规则，不额外收紧",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "R1"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "borrow",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "borrow_date": "2024-03-01"
+        },
+        "expected": {
+          "ok": true
+        }
+      },
+      {
+        "input": {
+          "action": "return_book",
+          "book_id": "B1",
+          "reader_id": "R1",
+          "return_date": "2024-02-01"
+        },
+        "expected": {
+          "ok": true,
+          "available_copies": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "S1",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "JSON损坏时拒绝新增并保留原字节",
+    "steps": [
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_files": {
+      "library_data.json": "{broken original data"
+    }
+  },
+  {
+    "id": "S2",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "错误根结构不能被当成空库",
+    "steps": [
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "甲"
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_files": {
+      "library_data.json": "[]"
+    }
+  },
+  {
+    "id": "S3",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "损坏字段不能静默修正并写回",
+    "steps": [
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "甲"
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_files": {
+      "library_data.json": "{\"next_seq\": 1, \"books\": {\"B1\": {\"book_id\": \"B1\", \"title\": \"旧书\", \"total_copies\": \"损坏\"}}, \"readers\": {}, \"borrows\": []}"
+    }
+  },
+  {
+    "id": "S4",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "悬空借阅记录拒绝加载",
+    "steps": [
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-12-01"
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_files": {
+      "library_data.json": "{\"next_seq\": 2, \"books\": {}, \"readers\": {}, \"borrows\": [{\"seq\": 1, \"book_id\": \"missing\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-01-01\", \"due_date\": \"2024-01-15\", \"returned\": false, \"return_date\": null}]}"
+    }
+  },
+  {
+    "id": "S5",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "写临时文件失败保留原库并返回JSON",
+    "steps": [
+      {
+        "input": {
+          "action": "list_overdue",
+          "date": "2024-01-01"
+        },
+        "expected": {
+          "ok": true,
+          "overdue": []
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      },
+      {
+        "input": {
+          "action": "add_book",
+          "book_id": "B1",
+          "title": "书A",
+          "total_copies": 1
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_files": {
+      "library_data.json": "{\"next_seq\": 1, \"books\": {}, \"readers\": {}, \"borrows\": []}"
+    },
+    "initial_directories": [
+      "library_data.json.tmp"
+    ]
+  },
+  {
+    "id": "S6",
+    "group": "quality_extension",
+    "source": "independent",
+    "description": "数据路径不可读时明确失败",
+    "steps": [
+      {
+        "input": {
+          "action": "add_reader",
+          "reader_id": "R1",
+          "name": "甲"
+        },
+        "expected": {
+          "ok": false,
+          "error": "storage_error"
+        },
+        "preserve_files": [
+          "library_data.json"
+        ]
+      }
+    ],
+    "initial_directories": [
+      "library_data.json"
+    ]
+  }
+]

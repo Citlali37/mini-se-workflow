@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import os
 import subprocess
@@ -10,6 +11,7 @@ import time
 from pathlib import Path
 from typing import Callable
 from .models import WorkflowCancelled
+from .contracts import file_path
 
 
 ALLOWED_IMPORTS = {
@@ -20,6 +22,46 @@ ALLOWED_IMPORTS = {
 FORBIDDEN_NAMES = {"eval", "exec", "compile", "__import__", "breakpoint", "globals", "locals", "vars", "getattr", "setattr", "delattr"}
 FORBIDDEN_ATTRIBUTES = {"modules", "__dict__", "__class__", "__subclasses__", "__globals__", "__builtins__", "__getattribute__"}
 MAX_OUTPUT = 65536
+
+
+def validate_fixtures(files: dict, cases: list[dict]) -> None:
+    """Only trusted independent tests use setup/preservation metadata; model contracts strip it."""
+    source_names = {name.lower() for name in files}
+    def checked(name, directory=False):
+        base = name[:-4] if isinstance(name, str) and directory and name.endswith('.tmp') else name
+        file_path(base)
+        if not base.endswith(('.json', '.txt')) or name.lower() in source_names:
+            raise ValueError('测试夹具只能使用不覆盖源文件的根目录JSON/TXT数据文件。')
+    for case in cases:
+        initial = case.get('initial_files', {})
+        directories = case.get('initial_directories', [])
+        if not isinstance(initial, dict) or len(initial) > 10 or not isinstance(directories, list) or len(directories) > 10:
+            raise ValueError('测试夹具数量无效。')
+        for name, body in initial.items():
+            checked(name)
+            if not isinstance(body, str) or len(body.encode('utf-8')) > 100000:
+                raise ValueError('测试夹具内容无效或超过100KB。')
+        for name in directories:
+            checked(name, directory=True)
+        if {n.lower() for n in directories} & {n.lower() for n in initial}:
+            raise ValueError('文件与目录夹具不能重叠。')
+        for step in case['steps']:
+            preserve = step.get('preserve_files', [])
+            if not isinstance(preserve, list) or len(preserve) > 10:
+                raise ValueError('文件保留断言无效。')
+            for name in preserve:
+                checked(name)
+
+
+def file_snapshot(path: Path) -> dict:
+    if not path.exists():
+        return {'kind': 'missing'}
+    if path.is_dir():
+        return {'kind': 'directory'}
+    size = path.stat().st_size
+    if size > 1000000:
+        raise ValueError('待核验数据文件超过1MB。')
+    return {'kind': 'file', 'bytes': size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
 def source_checks(files: dict[str, str]) -> list[dict]:
@@ -146,6 +188,7 @@ class AcceptanceRunner:
         self.round_timeout = round_timeout
 
     def run(self, files: dict[str, str], cases: list[dict], on_case: Callable[[dict], None] | None = None, *, should_cancel=None) -> dict:
+        validate_fixtures(files, cases)
         syntax = source_checks(files)
         report = {"passed": False, "source_checks": syntax, "cases": [], "total": len(cases), "passed_count": 0}
         if not syntax or any(not item["passed"] for item in syntax):
@@ -161,13 +204,27 @@ class AcceptanceRunner:
                 root = Path(temp)
                 for name, content in files.items():
                     (root / name).write_text(content, encoding="utf-8")
+                for name, content in case.get('initial_files', {}).items():
+                    (root / name).write_text(content, encoding='utf-8')
+                for name in case.get('initial_directories', []):
+                    (root / name).mkdir()
                 for index, step in enumerate(case["steps"], 1):
+                    before = {name: file_snapshot(root / name) for name in step.get('preserve_files', [])}
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
                         execution = {"actual": None, "error": "本轮验收时间预算已用完。", "stdout": "", "stderr": ""}
                     else:
                         execution = execute_request(root, step["input"], min(self.step_timeout, remaining), should_cancel)
                     difference = execution["error"] or compare_json(execution["actual"], step["expected"])
+                    file_checks = []
+                    for name, original in before.items():
+                        after = file_snapshot(root / name)
+                        unchanged = original == after
+                        file_checks.append({'file': name, 'passed': unchanged, 'before': original, 'after': after})
+                        if not unchanged:
+                            difference = difference or f'失败请求改变了数据文件 {name}。'
+                    if file_checks:
+                        execution['file_checks'] = file_checks
                     result["steps"].append({"number": index, "input": step["input"], "expected": step["expected"], **execution, "passed": not difference, "difference": difference or ""})
                     if difference:
                         result["passed"] = False

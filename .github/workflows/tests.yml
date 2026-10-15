@@ -18,3 +18,4 @@ jobs:
       - run: python -m pip install .
       - run: python -X utf8 -m unittest discover -s tests -v
       - run: python -X utf8 -m mini_se_workflow.evaluation --output .ci-output/evaluation.json --run-root .ci-output/runs
+      - run: python -X utf8 -m mini_se_workflow.comparison --repeats 1 --output .ci-output/comparison.json --run-root .ci-output/comparison-runs
