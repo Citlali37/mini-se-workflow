@@ -85,13 +85,18 @@ def main() -> int:
                            str(directory / "library-audit.json")], directory / "library-audit.json"),
     ]
     summary = {"mode": "offline-repository-verification", "created_at": stamp,
-               "description": "Checks code and fixed fixtures; does not measure model capability.", "checks": []}
+               "description": "Checks code and fixed fixtures; does not measure model capability.",
+               "expected_checks": [name for name, _, _ in plan],
+               "completed": False, "passed": False, "checks": []}
+    summary_path = directory / "summary.json"
+    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     for name, arguments, artifact in plan:
         print("Running " + name + " ...", flush=True)
         result = run_check(name, arguments, directory, artifact)
         summary["checks"].append(result)
-        summary["passed"] = all(item["passed"] for item in summary["checks"])
-        (directory / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        summary["completed"] = len(summary["checks"]) == len(plan)
+        summary["passed"] = summary["completed"] and all(item["passed"] for item in summary["checks"])
+        summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
         print(name + ": " + ("PASS" if result["passed"] else "FAIL: " + result["error"]), flush=True)
     print("Evidence: " + str(directory), flush=True)
     return 0 if summary["passed"] else 1
