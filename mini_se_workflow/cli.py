@@ -43,7 +43,8 @@ def create_workflow(args) -> MiniSEWorkflow:
             thinking=os.getenv("LLM_THINKING") or None,
             reasoning_effort=os.getenv("LLM_REASONING_EFFORT") or None,
         )
-    return MiniSEWorkflow(client, RunStore(args.output), mode="demo" if args.demo else "deepseek", max_repairs=args.max_repairs)
+    return MiniSEWorkflow(client, RunStore(args.output), mode="demo" if args.demo else "deepseek",
+                          max_repairs=args.max_repairs, max_stage_corrections=args.stage_corrections)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -57,6 +58,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--example", choices=["todo"], help="使用示例需求及独立固定验收。")
     parser.add_argument("--output", default=str(ROOT / "outputs"), help="运行记录及项目输出目录。")
     parser.add_argument("--max-repairs", type=int, choices=range(6), default=2)
+    parser.add_argument("--stage-corrections", type=int, choices=range(3), default=2,
+                        help="需求/设计各阶段允许的输出纠正次数，默认2；不计入代码返工。")
     parser.add_argument("--review", action="store_true", help="在需求确认前暂停。")
     parser.add_argument("--resume", help="继续已有运行编号。")
     parser.add_argument("--action", choices=["retry", "confirm", "clarify"], default="retry")

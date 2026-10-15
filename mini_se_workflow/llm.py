@@ -12,6 +12,15 @@ class LLMError(RuntimeError):
     """Raised when a model request or response is invalid."""
 
 
+class LLMResponseError(LLMError):
+    """A response arrived, but its public content cannot be used."""
+
+    def __init__(self, message: str, *, kind: str = 'invalid_json', content: str = '') -> None:
+        super().__init__(message)
+        self.feedback = {'kind': kind, 'error': message, 'response_excerpt': content[:8000],
+                         'excerpt_truncated': len(content) > 8000}
+
+
 class WorkflowLLMClient(Protocol):
     def complete_json(
         self,
@@ -35,7 +44,7 @@ class DeepSeekClient:
         max_retries: int = 3,
         thinking: str | None = None,
         reasoning_effort: str | None = None,
-        max_tokens: int | None = None,
+        max_tokens: int | None = 16384,
         request_limit: int | None = None,
     ) -> None:
         if not base_url.strip():
@@ -103,8 +112,16 @@ class DeepSeekClient:
                 self.usage_records.append({"agent": agent_name, "model": response_data.get("model", self.model),
                     "usage": response_data.get("usage", {}), "request_number": self.request_count,
                     "finish_reason": response_data.get("choices", [{}])[0].get("finish_reason") if response_data.get("choices") else None})
+                choice = response_data.get('choices', [{}])[0] if response_data.get('choices') else {}
+                if choice.get('finish_reason') == 'length':
+                    content = choice.get('message', {}).get('content') or ''
+                    raise LLMResponseError('模型输出达到token上限，正文可能截断；请精简后重新输出完整JSON。',
+                                           kind='output_truncated', content=content if isinstance(content, str) else '')
                 content = self._extract_content(response_data)
-                return parse_json_object(content)
+                try:
+                    return parse_json_object(content)
+                except LLMError as exc:
+                    raise LLMResponseError(str(exc), content=content) from exc
             except urllib.error.HTTPError as exc:
                 detail = exc.read().decode("utf-8", errors="replace")[:1000]
                 last_error = LLMError(f"DeepSeek 返回 HTTP {exc.code}：{detail}")
@@ -125,9 +142,9 @@ class DeepSeekClient:
         try:
             content = payload["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
-            raise LLMError("DeepSeek 响应缺少 choices[0].message.content。") from exc
+            raise LLMResponseError("DeepSeek 响应缺少 choices[0].message.content。", kind='empty_content') from exc
         if not isinstance(content, str) or not content.strip():
-            raise LLMError("DeepSeek 没有返回有效内容。")
+            raise LLMResponseError("DeepSeek 没有返回有效内容。", kind='empty_content')
         return content
 
 

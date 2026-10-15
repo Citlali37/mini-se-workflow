@@ -6,7 +6,8 @@ import time
 from typing import Callable
 from uuid import uuid4
 
-from .agents import CodingAgent, DesignAgent, RequirementsAgent
+from .agents import CodingAgent, DesignAgent, RequirementsAgent, PlanningOutputError
+from .llm import LLMResponseError
 from .contracts import ContractError, specification as validate_specification
 from .demo import DEMO_TASK, benchmark_cases
 from .models import WorkflowCancelled, WorkflowExecutionError, WorkflowState, timestamp
@@ -15,9 +16,13 @@ from .store import RunStore
 
 
 class MiniSEWorkflow:
-    def __init__(self, client, store: RunStore, *, mode: str = 'deepseek', max_repairs: int = 2, runner: AcceptanceRunner | None = None) -> None:
+    def __init__(self, client, store: RunStore, *, mode: str = 'deepseek', max_repairs: int = 2,
+                 runner: AcceptanceRunner | None = None, max_stage_corrections: int = 2) -> None:
         if type(max_repairs) is not int or not 0 <= max_repairs <= 5:
             raise ValueError('最多返工次数必须在0到5之间。')
+        if type(max_stage_corrections) is not int or not 0 <= max_stage_corrections <= 2:
+            raise ValueError('前置阶段纠正次数必须在0到2之间。')
+        self.max_stage_corrections = max_stage_corrections
         self.requirements_agent = RequirementsAgent(client)
         self.design_agent = DesignAgent(client)
         self.coding_agent = CodingAgent(client)
@@ -40,7 +45,8 @@ class MiniSEWorkflow:
             require_confirmation: bool = False, should_cancel: Callable[[], bool] | None = None) -> WorkflowState:
         task = self.validate_task(task, example_id)
         state = WorkflowState(uuid4().hex[:16], task, self.mode, example_id=example_id,
-                              max_repairs=self.max_repairs, review_required=require_confirmation)
+                              max_repairs=self.max_repairs, review_required=require_confirmation,
+                              max_stage_corrections=self.max_stage_corrections)
         return self._execute(state, on_update, should_cancel)
 
     def prepare_resume(self, run_id: str, *, action: str = 'retry', specification: dict | None = None, answer: str = '') -> WorkflowState:
@@ -113,10 +119,44 @@ class MiniSEWorkflow:
             check_cancel()
             return result, round((time.monotonic() - started) * 1000)
 
+        def planning_call(step, agent, operation, message):
+            cycle = sum(item.get('action') == 'clarified' for item in state.requirement_history)
+            record = state.planning.setdefault(f'{step}:{cycle}',
+                {'stage': step, 'cycle': cycle, 'corrections_used': 0, 'attempts': [], 'feedback': None})
+            started = time.monotonic()
+            while True:
+                check_cancel()
+                feedback = copy.deepcopy(record['feedback'])
+                if feedback:
+                    if record['corrections_used'] >= state.max_stage_corrections:
+                        raise ValueError(f'{agent}前置纠正预算已耗尽：' + feedback['error'])
+                    record['corrections_used'] += 1
+                attempt = {'time': timestamp(), 'status': 'running', 'correction': record['corrections_used']}
+                record['attempts'].append(attempt)
+                event(step, agent, 'running', message if not feedback else
+                      f"正在纠正输出（{record['corrections_used']}/{state.max_stage_corrections}）：{feedback['error']}")
+                try:
+                    result = operation(feedback)
+                except (PlanningOutputError, LLMResponseError) as exc:
+                    attempt.update(status='invalid', feedback=copy.deepcopy(exc.feedback))
+                    record['feedback'] = copy.deepcopy(exc.feedback)
+                    send('输出校验', agent, 'correction_feedback', str(exc))
+                    event(step, agent, 'rejected', str(exc))
+                    continue
+                except Exception as exc:
+                    attempt.update(status='failed', error=str(exc))
+                    notify()
+                    raise
+                attempt['status'] = 'completed'
+                record['feedback'] = None
+                notify()
+                check_cancel()
+                return result, round((time.monotonic() - started) * 1000)
+
         try:
             notify()
             if state.next_step == 'requirements':
-                spec, elapsed = call('requirements', '需求 Agent', lambda: self.requirements_agent.run(state.task), '正在整理需求和可执行验收条件。')
+                spec, elapsed = planning_call('requirements', '需求 Agent', lambda feedback: self.requirements_agent.run(state.task, feedback=feedback), '正在整理需求和可执行验收条件。')
                 state.specification = spec
                 state.requirement_history.append({'time': timestamp(), 'action': 'generated', 'specification': copy.deepcopy(spec)})
                 if spec.get('questions'):
@@ -145,7 +185,7 @@ class MiniSEWorkflow:
 
             if state.next_step == 'design':
                 send('需求 Agent', '设计 Agent', 'specification', frozen_spec['summary'])
-                plan, elapsed = call('design', '设计 Agent', lambda: self.design_agent.run(copy.deepcopy(frozen_spec)), '正在定义文件职责、接口和数据结构。')
+                plan, elapsed = planning_call('design', '设计 Agent', lambda feedback: self.design_agent.run(copy.deepcopy(frozen_spec), feedback=feedback), '正在定义文件职责、接口和数据结构。')
                 state.design = plan
                 state.next_step = 'coding'
                 send('设计 Agent', '编码 Agent', 'design + specification', plan['summary'])
@@ -164,7 +204,7 @@ class MiniSEWorkflow:
                         state.next_step = 'validation'
                         send('编码 Agent', '验收执行器', 'files', artifact['summary'])
                         event(step, '编码 Agent', 'completed', artifact['summary'], duration_ms=elapsed)
-                    except ContractError as exc:
+                    except (ContractError, LLMResponseError) as exc:
                         state.pending_artifact = {'summary': '编码输出格式未通过校验。', 'files': {}, 'contract_error': str(exc)}
                         state.next_step = 'validation'
                         notify()

@@ -24,7 +24,7 @@ flowchart LR
     V -- 预算耗尽 --> E[保留未通过结果与代码]
 ```
 
-CLI 默认自动执行，使用 `--review` 可在需求确认前暂停。返工默认最多两次，可配置 0–5 次；初稿不计返工。需求/设计契约错误与模型调用异常保存为失败，需检查或重试失败节点，不会自动进入编码返工循环。
+CLI 默认自动执行，使用 `--review` 可在需求确认前暂停。需求和设计输出不合规时，各允许最多两次纠正，可用 `--stage-corrections 0` 关闭；次数和错误保存在原任务，恢复不重置。代码返工默认最多两次，可配置 0–5 次；初稿不计返工。格式纠正、网络重试和代码返工分别计数，耗尽预算或遇到不可恢复错误时保留失败状态。
 
 ## 环境与安装
 
@@ -57,7 +57,7 @@ python -X utf8 -m mini_se_workflow --demo --web --open-browser
 | 消息传递或状态共享 | `WorkflowState`、消息摘要、逐阶段事件、磁盘检查点 |
 | 条件与循环 | 需求澄清分支、验收分支、有预算返工循环 |
 | 需求正确性 | Web 编辑/确认、需求编号追踪、冻结验收、补充后继续同一任务 |
-| 错误处理 | 有限网络重试、失败节点重试、中断恢复、取消、预算不重置 |
+| 错误处理 | 有限网络重试、前置输出纠正、失败节点重试、中断恢复、取消、预算不重置 |
 | 结果可复核 | 代码差异、执行日志、ZIP、交付报告、独立评测及失败保留 |
 | 持续验证 | Windows/Ubuntu × Python 3.10/3.13，CI 上传每项日志与结果 |
 | 模块扩展 | 模型客户端、Agent、验收执行器与状态存储分别定义 |
@@ -84,11 +84,11 @@ python -X utf8 -m mini_se_workflow.verification
 
 | 类型 | 结果 | 说明 |
 |---|---|---|
-| 自动化测试 | 58 项，覆盖执行器、工作流、恢复、Web、报告和测试入口 | 运行上方命令或查看 [CI](https://github.com/Peanora/mini-se-workflow/actions) 日志 |
+| 自动化测试 | 69 项，覆盖执行器、工作流、前置纠正、恢复、Web、报告和实验隔离 | 运行上方命令或查看 [CI](https://github.com/Peanora/mini-se-workflow/actions) 日志 |
 | 离线流程与评测 | 待办 7/9 → 9/9；六项评测符合预期 | 固定响应，只验证机制 |
 | 真实需求评测 | 首轮 3/6；定向复测 2/3 | [失败记录与口径](examples/评测说明.md)，不能拼成全通过 |
 | 图书案例审查 | 原业务复核 9/9；新增质量检查原版 0/12、审查修订 12/12 | [原版/修订版与完整结果](examples/library-audit/审查说明.md)；修订由开发助手在工作流外完成 |
-| 真实单/三 Agent 对照 | 单 Agent 5/6，三 Agent 1/6 | [报告](examples/comparison-real.md)、[原始 JSON](examples/comparison-real.json)、[全部运行归档](examples/comparison-real.zip)；小样本不能证明一般优劣 |
+| 真实单/三 Agent 对照（前置纠正改进前） | 单 Agent 5/6，三 Agent 1/6 | [报告](examples/comparison-real.md)、[原始 JSON](examples/comparison-real.json)、[全部运行归档](examples/comparison-real.zip)；小样本不能证明一般优劣 |
 
 图书原始运行的 **8/8** 验收保持不变；新增要求单独计分，修订版独立检查为 **21/21**。保存的真实记录可审阅，重新调用模型不保证得到相同结果。
 
@@ -105,4 +105,4 @@ python -X utf8 -m mini_se_workflow.verification
 
 当前生成目标是使用标准库、JSON 标准输入输出的小型本地 Python 工具，最多 10 个根目录文件。不支持联网工具、安装第三方依赖或任意框架。验收有临时目录、精简环境、时间和输出限制，**不构成操作系统级安全沙箱**。本地服务串行执行，不提供分布式锁；远端模型请求不能立即撤回。验收通过也不能保证需求无遗漏。
 
-架构、状态与扩展方式见 [Design.md](Design.md)，实验设置和局限见 [单 Agent 对照方案](examples/单Agent对照方案.md) 与 [实验报告](examples/comparison-real.md)。
+架构、状态与扩展方式见 [Design.md](Design.md)，实验设置和局限见 [单 Agent 对照方案](examples/单Agent对照方案.md)、[实验报告](examples/comparison-real.md) 与 [前置纠正实验方案](examples/前置纠正实验方案.md)。

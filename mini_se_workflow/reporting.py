@@ -35,6 +35,16 @@ def delivery_report(state: dict) -> str:
         files = [f['path'] for f in state.get('design', {}).get('files', []) if key in f.get('requirement_ids', [])]
         cases = [c['id'] for c in spec.get('acceptance', []) if key in c.get('requirement_ids', [])]
         lines.append(f"- {key}：{requirement['description']}；文件：{', '.join(files) or '未设计'}；验收：{', '.join(cases) or '无'}")
+    lines += ['', '## 前置阶段输出纠正', '']
+    if state.get('planning'):
+        for record in state['planning'].values():
+            lines.append(f"- {record['stage']} 第{record['cycle']+1}轮：调用{len(record['attempts'])}次；纠正{record['corrections_used']}/{state.get('max_stage_corrections', 2)}次。")
+            for attempt in record['attempts']:
+                reason = attempt.get('feedback', {}).get('error') or attempt.get('error')
+                if reason:
+                    lines.append(f"  - {attempt['status']}：{reason}")
+    else:
+        lines.append('旧记录或未执行前置阶段，没有纠正记录。')
     lines += ['', '## 每版验收与修改', '']
     diffs = revision_diffs(state)
     for revision, changes in zip(state.get('iterations', []), diffs):

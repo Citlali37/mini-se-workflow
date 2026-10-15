@@ -94,7 +94,7 @@ def specification(payload: Any) -> dict:
             steps.append({"input": input_value, "expected": expected})
         acceptance.append({"id": key, "requirement_ids": refs, "description": text(case.get("description"), "验收说明", 2000), "steps": steps})
     if covered != known:
-        raise ContractError("每项需求必须至少被一个验收用例覆盖。")
+        raise ContractError("每项需求必须至少被一个验收用例覆盖。未覆盖编号：" + ', '.join(sorted(known - covered)))
     return {
         "project_name": text(payload.get("project_name"), "项目名称", 100),
         "summary": text(payload.get("summary"), "需求摘要"),
@@ -123,7 +123,7 @@ def design(payload: Any, spec: dict) -> dict:
     if "README.md" not in {item["path"] for item in files}:
         raise ContractError("设计必须包含使用说明 README.md。")
     if covered != known:
-        raise ContractError("设计必须覆盖全部需求编号。")
+        raise ContractError("设计必须覆盖全部需求编号。未覆盖编号：" + ', '.join(sorted(known - covered)))
     return {
         "summary": text(payload.get("summary"), "设计摘要"),
         "files": files,
