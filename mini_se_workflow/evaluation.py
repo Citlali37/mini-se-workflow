@@ -145,7 +145,7 @@ def main(argv=None):
     if args.real:
         load_env(ROOT/'.env')
         client = DeepSeekClient(os.getenv('LLM_BASE_URL', 'https://api.deepseek.com'),
-            os.getenv('DEEPSEEK_API_KEY') or os.getenv('LLM_API_KEY', ''), os.getenv('LLM_MODEL', 'deepseek-chat'),
+            os.getenv('DEEPSEEK_API_KEY') or os.getenv('LLM_API_KEY', ''), os.getenv('LLM_MODEL', 'deepseek-flash'),
             timeout_seconds=float(os.getenv('LLM_TIMEOUT_SECONDS', '90')), max_retries=int(os.getenv('LLM_MAX_RETRIES', '3')),
             thinking=os.getenv('LLM_THINKING') or None, reasoning_effort=os.getenv('LLM_REASONING_EFFORT') or None,
             max_tokens=args.max_tokens, request_limit=args.request_limit)

@@ -37,7 +37,7 @@ def create_workflow(args) -> MiniSEWorkflow:
         client = DeepSeekClient(
             base_url=os.getenv("LLM_BASE_URL", "https://api.deepseek.com"),
             api_key=key,
-            model=os.getenv("LLM_MODEL", "deepseek-chat"),
+            model=os.getenv("LLM_MODEL", "deepseek-flash"),
             timeout_seconds=float(os.getenv("LLM_TIMEOUT_SECONDS", "90")),
             max_retries=int(os.getenv("LLM_MAX_RETRIES", "3")),
             thinking=os.getenv("LLM_THINKING") or None,
