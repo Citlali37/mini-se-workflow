@@ -84,11 +84,12 @@ python -X utf8 -m mini_se_workflow.verification
 
 | 类型 | 结果 | 说明 |
 |---|---|---|
-| 自动化测试 | 69 项，覆盖执行器、工作流、前置纠正、恢复、Web、报告和实验隔离 | 运行上方命令或查看 [CI](https://github.com/Peanora/mini-se-workflow/actions) 日志 |
+| 自动化测试 | 71 项，覆盖执行器、工作流、前置纠正、恢复、Web、报告和实验隔离 | 运行上方命令或查看 [CI](https://github.com/Peanora/mini-se-workflow/actions) 日志 |
 | 离线流程与评测 | 待办 7/9 → 9/9；六项评测符合预期 | 固定响应，只验证机制 |
 | 真实需求评测 | 首轮 3/6；定向复测 2/3 | [失败记录与口径](examples/评测说明.md)，不能拼成全通过 |
 | 图书案例审查 | 原业务复核 9/9；新增质量检查原版 0/12、审查修订 12/12 | [原版/修订版与完整结果](examples/library-audit/审查说明.md)；修订由开发助手在工作流外完成 |
 | 真实单/三 Agent 对照（前置纠正改进前） | 单 Agent 5/6，三 Agent 1/6 | [报告](examples/comparison-real.md)、[原始 JSON](examples/comparison-real.json)、[全部运行归档](examples/comparison-real.zip)；小样本不能证明一般优劣 |
+| 前置纠正同期实验 | 关闭2/3、开启2/3 | [报告](examples/reliability-real.md)、[原始JSON](examples/reliability-real.json)、[归档](examples/reliability-real.zip)；观察到设计JSON纠正成功，图书仍因16384上限连续截断 |
 
 图书原始运行的 **8/8** 验收保持不变；新增要求单独计分，修订版独立检查为 **21/21**。保存的真实记录可审阅，重新调用模型不保证得到相同结果。
 

@@ -37,14 +37,19 @@ def write_report(report: dict, output: Path) -> None:
     report['metrics'] = {}
     for arm in ('disabled', 'enabled'):
         rows = [r for r in report['trials'] if r['arm'] == arm]
+        if not rows:
+            continue
         report['metrics'][arm] = {'success': sum(r['success'] for r in rows), 'total': len(rows),
             'logical_calls': sum(r['logical_calls'] for r in rows),
             'http_requests': sum(r['http_requests'] for r in rows),
             'corrections': sum(r['corrections'] for r in rows),
             'duration_seconds': round(sum(r['duration_ms'] for r in rows) / 1000, 3)}
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
-    lines = ['# 前置纠正实验结果', '', f"模式：{report['mode']}；完成：{len(report['trials'])}/6。", '',
-        '两组使用相同模型、提示、开发集、隐藏独立集及代码返工预算，只改变需求/设计的输出纠正预算。', '',
+    description = ('图书任务定向复测，开启前置纠正，输出上限32768；不与首轮结果合并，不构成同期对照。'
+                   if report.get('study_kind') == 'library-followup' else
+                   '两组使用相同模型、提示、开发集、隐藏独立集及代码返工预算，只改变需求/设计的输出纠正预算。')
+    lines = ['# 前置纠正实验结果', '', f"模式：{report['mode']}；完成：{len(report['trials'])}/{report.get('expected_trials', 6)}。", '',
+        description, '',
         '| 组别 | 成功 | 逻辑调用 | HTTP请求 | 前置纠正 | 耗时（秒） |', '|---|---|---|---|---|---|']
     for arm, item in report['metrics'].items():
         lines.append(f"| {arm} | {item['success']}/{item['total']} | {item['logical_calls']} | {item['http_requests']} | {item['corrections']} | {item['duration_seconds']} |")
@@ -52,7 +57,7 @@ def write_report(report: dict, output: Path) -> None:
     for trial in report['trials']:
         heldout = trial['holdout']
         result = f"{heldout['passed_count']}/{heldout['total']}" if heldout else '未执行'
-        error = (trial['error'] or '无').replace('|', '/').replace('\n', ' ')
+        error = (trial['error'] or trial.get('validation_error') or '无').replace('|', '/').replace('\n', ' ')
         lines.append(f"| {trial['task']} | {trial['arm']} | {trial['status']} | {result} | {error} |")
     lines += ['', '## 用量与限制', '',
         f"已记录用量：输入{report['prompt_tokens']}、输出{report['completion_tokens']} token。高峰全未缓存估算{report['recorded_cost_usd']:.6f}美元。",
@@ -64,7 +69,7 @@ def write_report(report: dict, output: Path) -> None:
     output.with_suffix('.md').write_text('\n'.join(lines), encoding='utf-8')
 
 
-def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
+def study(client, store: RunStore, *, mode: str, output: Path, library_followup: bool = False) -> dict:
     if output.exists() or output.with_suffix('.zip').exists() or output.with_suffix('.md').exists():
         raise ValueError('实验目标已存在，请选择新路径，保留旧实验。')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -74,6 +79,8 @@ def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
         raise ValueError('固定实验必须包含文本统计、记账、图书三个任务。')
     sources = {p.name: p.read_bytes() for p in Path(__file__).parent.glob('*.py')}
     report = {'created_at': timestamp(), 'mode': mode, 'complete': False,
+        'study_kind': 'library-followup' if library_followup else 'paired',
+        'expected_trials': 1 if library_followup else 6,
         'suite_sha256': hashlib.sha256(suite_bytes).hexdigest(),
         'implementation_sha256': {name: hashlib.sha256(body).hexdigest() for name, body in sources.items()},
         'settings': {key: getattr(client, key, None) for key in
@@ -86,7 +93,10 @@ def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
     start_usage = len(getattr(client, 'usage_records', []))
     write_report(report, output)
     for index, item in enumerate(suite):
-        for arm in (('disabled', 'enabled') if index % 2 == 0 else ('enabled', 'disabled')):
+        if library_followup and item['id'] != 'library':
+            continue
+        arms = ('enabled',) if library_followup else (('disabled', 'enabled') if index % 2 == 0 else ('enabled', 'disabled'))
+        for arm in arms:
             if mode == 'fixture':
                 client.begin(item)
             before_calls = len(tracked.calls)
@@ -105,6 +115,7 @@ def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
             store.save(state.to_dict())
             trial = {'task': item['id'], 'arm': arm, 'run_id': state.run_id, 'status': state.status,
                 'success': success, 'error': state.error, 'holdout': heldout, 'repair_count': state.repair_count,
+                'validation_error': state.iterations[-1]['validation'].get('error', '') if state.iterations else '',
                 'logical_calls': len(tracked.calls) - before_calls,
                 'http_requests': getattr(client, 'request_count', 0) - before_requests,
                 'corrections': sum(r['corrections_used'] for r in state.planning.values()),
@@ -116,7 +127,7 @@ def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
             report['prompt_tokens'] = sum(r['usage'].get('prompt_tokens', 0) for r in report['usage_records'])
             report['completion_tokens'] = sum(r['usage'].get('completion_tokens', 0) for r in report['usage_records'])
             report['recorded_cost_usd'] = (report['prompt_tokens'] * 0.30 + report['completion_tokens'] * 1.20) / 1_000_000
-            report['complete'] = len(report['trials']) == 6
+            report['complete'] = len(report['trials']) == report['expected_trials']
             write_report(report, output)
             # Rebuild from the captured bytes so later code edits cannot change this experiment's provenance.
             with zipfile.ZipFile(output.with_suffix('.zip'), 'w', zipfile.ZIP_DEFLATED) as archive:
@@ -139,6 +150,7 @@ def study(client, store: RunStore, *, mode: str, output: Path) -> dict:
 def main(argv=None):
     parser = argparse.ArgumentParser(description='固定三任务、每组一次的前置纠正实验；默认离线故障注入。')
     parser.add_argument('--real', action='store_true')
+    parser.add_argument('--library-followup', action='store_true', help='独立图书复测：每次输出32768 token，仅一次流程，不覆盖首轮。')
     parser.add_argument('--output')
     parser.add_argument('--run-root', default=str(ROOT / 'outputs/reliability/runs'))
     args = parser.parse_args(argv)
@@ -148,11 +160,14 @@ def main(argv=None):
         client = DeepSeekClient(os.getenv('LLM_BASE_URL', 'https://api.deepseek.com'),
             os.getenv('DEEPSEEK_API_KEY') or os.getenv('LLM_API_KEY', ''), os.getenv('LLM_MODEL', 'deepseek-flash'),
             thinking=os.getenv('LLM_THINKING') or None, reasoning_effort=os.getenv('LLM_REASONING_EFFORT') or None,
-            timeout_seconds=90, max_retries=3, max_tokens=16384, request_limit=60)
-    output = Path(args.output or ROOT / ('outputs/reliability-real.json' if args.real else 'outputs/reliability-fixture.json'))
-    report = study(client, RunStore(args.run_root), mode='deepseek' if args.real else 'fixture', output=output)
+            timeout_seconds=90, max_retries=3, max_tokens=32768 if args.library_followup else 16384,
+            request_limit=16 if args.library_followup else 60)
+    name = 'library-followup' if args.library_followup else 'reliability'
+    output = Path(args.output or ROOT / f"outputs/{name}-{'real' if args.real else 'fixture'}.json")
+    report = study(client, RunStore(args.run_root), mode='deepseek' if args.real else 'fixture', output=output,
+                   library_followup=args.library_followup)
     print(json.dumps(report['metrics'], ensure_ascii=False), flush=True)
-    return 0 if report['complete'] and report['metrics']['enabled']['success'] == 3 else 2
+    return 0 if report['complete'] and report['metrics']['enabled']['success'] == (1 if args.library_followup else 3) else 2
 
 
 if __name__ == '__main__':

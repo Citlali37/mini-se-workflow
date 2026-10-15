@@ -56,3 +56,15 @@ class ReliabilityTests(unittest.TestCase):
             with patch.object(reliability, 'SUITE', suite_path), self.assertRaisesRegex(ValueError, '三个任务'):
                 reliability.study(reliability.ReliabilityFixtureClient(), RunStore(root / 'runs'),
                                   mode='fixture', output=root / 'result.json')
+
+    def test_explicit_followup_is_separate_and_runs_only_library_once(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            result = reliability.study(reliability.ReliabilityFixtureClient(), RunStore(root / 'runs'),
+                mode='fixture', output=root / 'followup.json', library_followup=True)
+        self.assertTrue(result['complete'])
+        self.assertEqual(result['study_kind'], 'library-followup')
+        self.assertEqual(result['expected_trials'], 1)
+        self.assertEqual(len(result['trials']), 1)
+        self.assertEqual(result['trials'][0]['task'], 'library')
+        self.assertNotIn('disabled', result['metrics'])

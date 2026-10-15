@@ -44,7 +44,7 @@ class DeepSeekClient:
         max_retries: int = 3,
         thinking: str | None = None,
         reasoning_effort: str | None = None,
-        max_tokens: int | None = 16384,
+        max_tokens: int | None = 32768,
         request_limit: int | None = None,
     ) -> None:
         if not base_url.strip():
@@ -53,6 +53,8 @@ class DeepSeekClient:
             raise ValueError("DEEPSEEK_API_KEY 不能为空。")
         if not model.strip():
             raise ValueError("LLM_MODEL 不能为空。")
+        if max_tokens is not None and (type(max_tokens) is not int or not 1024 <= max_tokens <= 65536):
+            raise ValueError('输出token预算必须是1024到65536之间的整数。')
         self.url = f"{base_url.rstrip('/')}/chat/completions"
         self.api_key = api_key
         self.model = model

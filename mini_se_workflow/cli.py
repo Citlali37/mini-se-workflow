@@ -42,6 +42,7 @@ def create_workflow(args) -> MiniSEWorkflow:
             max_retries=int(os.getenv("LLM_MAX_RETRIES", "3")),
             thinking=os.getenv("LLM_THINKING") or None,
             reasoning_effort=os.getenv("LLM_REASONING_EFFORT") or None,
+            max_tokens=int(os.getenv("LLM_MAX_TOKENS", "32768")),
         )
     return MiniSEWorkflow(client, RunStore(args.output), mode="demo" if args.demo else "deepseek",
                           max_repairs=args.max_repairs, max_stage_corrections=args.stage_corrections)

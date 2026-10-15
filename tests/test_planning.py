@@ -157,3 +157,13 @@ class PlanningTests(unittest.TestCase):
         self.assertEqual(caught.exception.feedback['kind'], 'output_truncated')
         self.assertNotIn('PRIVATE_REASONING', str(caught.exception.feedback))
         self.assertEqual(client.usage_records[0]['usage']['completion_tokens'], 16384)
+
+    def test_explicit_default_output_budget_and_invalid_limits(self):
+        for value in (True, 1023, 65537):
+            with self.assertRaises(ValueError):
+                DeepSeekClient('https://api.deepseek.com', 'test-key', 'test-model', max_tokens=value)
+        client = DeepSeekClient('https://api.deepseek.com', 'test-key', 'test-model')
+        response = io.BytesIO(json.dumps({'choices': [{'message': {'content': '{"ok":true}'}}]}).encode())
+        with patch('urllib.request.urlopen', return_value=response) as request:
+            client.complete_json(agent_name='coding', system_prompt='s', user_prompt='u')
+        self.assertEqual(json.loads(request.call_args.args[0].data)['max_tokens'], 32768)
