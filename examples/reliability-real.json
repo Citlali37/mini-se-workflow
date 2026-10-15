@@ -1133,5 +1133,8 @@
       "duration_seconds": 575.3
     }
   },
-  "postprocessing": "Added validation_error derived from archived workflow iterations; statuses, successes, usage, source hashes and original run files unchanged."
+  "postprocessing": "Added validation_error derived from archived workflow iterations; statuses, successes, usage, source hashes and original run files unchanged. Report text and case-count explanation regenerated offline; original outcomes, run states, usage and captured implementation unchanged.",
+  "notes": [
+    "历史契约失败发生在程序执行之前，日志中的total来自模型规格，不表示已运行该数量的用例；图书固定开发集为2项。后续代码已统一失败时的分母显示，原始流程状态和成绩未修改。"
+  ]
 }

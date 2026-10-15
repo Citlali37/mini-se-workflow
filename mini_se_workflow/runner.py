@@ -187,6 +187,9 @@ class AcceptanceRunner:
         self.step_timeout = step_timeout
         self.round_timeout = round_timeout
 
+    def case_count(self, cases: list[dict]) -> int:
+        return len(cases)
+
     def run(self, files: dict[str, str], cases: list[dict], on_case: Callable[[dict], None] | None = None, *, should_cancel=None) -> dict:
         validate_fixtures(files, cases)
         syntax = source_checks(files)

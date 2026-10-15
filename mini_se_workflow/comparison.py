@@ -50,6 +50,9 @@ class DevelopmentRunner(AcceptanceRunner):
         super().__init__()
         self.cases = copy.deepcopy(cases)
 
+    def case_count(self, ignored_cases) -> int:
+        return len(self.cases)
+
     def run(self, files, ignored_cases, on_case=None, **kwargs):
         return super().run(files, copy.deepcopy(self.cases), on_case, **kwargs)
 

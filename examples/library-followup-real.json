@@ -1,0 +1,2062 @@
+{
+  "created_at": "2026-10-15T08:29:47+00:00",
+  "mode": "deepseek",
+  "complete": true,
+  "study_kind": "library-followup",
+  "expected_trials": 1,
+  "suite_sha256": "d349cf7db36225d2a385183921a7ce3e1084dd32b96c4bfcc74230e369e46015",
+  "implementation_sha256": {
+    "agents.py": "aeb6e66731ca757e70a029b0e01bf4c01e7836090f8fcdf9240d174e79a96db1",
+    "cli.py": "ccb4c6da63ba26d6e0a2a3d167ca26d0c862347cc2e7597ee805d103b6f205dc",
+    "comparison.py": "eaea012e9ccdf3b52407adc342cd31e650c3e1a72ce48513b9b1e4bbda3371b5",
+    "contracts.py": "6b250ce5dcdb50258d90309f10dbb79cc7abea2eb8113d0e2787cb425ad0f995",
+    "demo.py": "a65c03cbf5e96cca59e1a1bf2b7deb99c4e02f65d343f09958ea278c92f6e237",
+    "evaluation.py": "0270cc0c6db284c755640b718e3073b86af04b20905228bce2391cbdf1abbb10",
+    "experiment_report.py": "a2707779252594f4a75e5e1075454b2f7b884e895ff290762367bc49582dddba",
+    "library_audit.py": "46a4d55233424d9d320846cfaedcffd1ec2f384b269112e8d87c686ecbef3223",
+    "llm.py": "b89f84445e1d0e43150ec9816a19c38ca09a533a942974314b88295f80d1bb91",
+    "models.py": "3ea35b9a9bee8be79506645ce5d96c3f8fcd87e511de1c210d466b543671fdd5",
+    "reliability.py": "04eac7c4dd1288403907fb227e8298628781274f78c03c7163e19020ff3d1541",
+    "reporting.py": "a6073ef9a4f7ab0e4c72b76b1cc4213e5b825e6685efc9b481c5f1df0448f1cc",
+    "runner.py": "d4d88db4a5e7b0c915ca438b574d6428f190744bbfd1d4c933ef2e8200713b93",
+    "store.py": "53f58646f418bde018bcf56e45842dbffa81374c802813541f407a026edd0398",
+    "verification.py": "1088f4fbc2ff109dc96729528955bb099d38acbda83a2a3307db6d4ab92161ba",
+    "web.py": "6849942b398dc8958d4247fff35850dd41cb0c7e8edb792a0ff1f128dc2d9da5",
+    "workflow.py": "acc49c1127ec1bc11c8d214bfe46d4c9eb8db34b5bd5f9ed8392d87da726b2a2",
+    "__init__.py": "667e57bc2546ef6f37dd3b7e9e0651b4f049671d9708249dee66f4fc90e030e3",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d"
+  },
+  "settings": {
+    "model": "deepseek-flash",
+    "thinking": "enabled",
+    "reasoning_effort": "high",
+    "max_tokens": 32768,
+    "request_limit": 16,
+    "timeout_seconds": 90
+  },
+  "correction_budgets": {
+    "disabled": 0,
+    "enabled": 2
+  },
+  "code_repairs": 2,
+  "trials": [
+    {
+      "task": "library",
+      "arm": "enabled",
+      "run_id": "633bb8ab617c45d1",
+      "status": "approved",
+      "success": true,
+      "error": "",
+      "holdout": {
+        "passed": true,
+        "source_checks": [
+          {
+            "file": "main.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "protocol.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "validation.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "storage.py",
+            "passed": true,
+            "errors": []
+          },
+          {
+            "file": "operations.py",
+            "passed": true,
+            "errors": []
+          }
+        ],
+        "cases": [
+          {
+            "id": "C2",
+            "source": "independent",
+            "description": "库存耗尽不写入，其他读者不能借出",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 1
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 1}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R2",
+                  "name": "R2"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R2",
+                    "name": "R2"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R2\", \"name\": \"R2\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-02-28"
+                },
+                "expected": {
+                  "ok": true,
+                  "available_copies": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 0,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-02-28",
+                    "due_date": "2024-03-13",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 0, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 5,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R2",
+                  "borrow_date": "2024-03-01"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "no_copies_available"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "no_copies_available"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"no_copies_available\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 514,
+                      "sha256": "1e4d16ba39da51baba114fbe0a879afecda12af5a69764b46d746c4552cdc414"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 514,
+                      "sha256": "1e4d16ba39da51baba114fbe0a879afecda12af5a69764b46d746c4552cdc414"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 6,
+                "input": {
+                  "action": "list_borrowed",
+                  "reader_id": "R2"
+                },
+                "expected": {
+                  "ok": true,
+                  "borrows": []
+                },
+                "actual": {
+                  "ok": true,
+                  "borrows": []
+                },
+                "stdout": "{\"ok\": true, \"borrows\": []}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "C4",
+            "source": "independent",
+            "description": "应还当日不逾期，次日逾期且按读者过滤",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 2
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 2
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 2}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R2",
+                  "name": "R2"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R2",
+                    "name": "R2"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R2\", \"name\": \"R2\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-02-28"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 1,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-02-28",
+                    "due_date": "2024-03-13",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 1, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 87,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 5,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-03-13"
+                },
+                "expected": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "actual": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "stdout": "{\"ok\": true, \"overdue\": []}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 6,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-03-14"
+                },
+                "expected": {
+                  "ok": true,
+                  "overdue": [
+                    {
+                      "book_id": "B1",
+                      "reader_id": "R1",
+                      "due_date": "2024-03-13"
+                    }
+                  ]
+                },
+                "actual": {
+                  "ok": true,
+                  "overdue": [
+                    {
+                      "book_id": "B1",
+                      "reader_id": "R1",
+                      "title": "书A",
+                      "borrow_date": "2024-02-28",
+                      "due_date": "2024-03-13"
+                    }
+                  ]
+                },
+                "stdout": "{\"ok\": true, \"overdue\": [{\"book_id\": \"B1\", \"reader_id\": \"R1\", \"title\": \"书A\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\"}]}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 7,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-03-14",
+                  "reader_id": "R2"
+                },
+                "expected": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "actual": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "stdout": "{\"ok\": true, \"overdue\": []}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 85,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "C5",
+            "source": "independent",
+            "description": "不同图书互不影响，跨进程保持借阅顺序",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B2",
+                  "title": "书B",
+                  "total_copies": 2
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B2",
+                    "title": "书B",
+                    "total_copies": 2
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B2\", \"title\": \"书B\", \"total_copies\": 2}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 1
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 1}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B2",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-02-28"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 1,
+                  "record": {
+                    "book_id": "B2",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-02-28",
+                    "due_date": "2024-03-13",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 1, \"record\": {\"book_id\": \"B2\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 105,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 5,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-02-28"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 0,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-02-28",
+                    "due_date": "2024-03-13",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 0, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 6,
+                "input": {
+                  "action": "list_borrowed",
+                  "reader_id": "R1"
+                },
+                "expected": {
+                  "ok": true,
+                  "borrows": [
+                    {
+                      "book_id": "B2",
+                      "title": "书B"
+                    },
+                    {
+                      "book_id": "B1",
+                      "title": "书A"
+                    }
+                  ]
+                },
+                "actual": {
+                  "ok": true,
+                  "borrows": [
+                    {
+                      "book_id": "B2",
+                      "title": "书B",
+                      "borrow_date": "2024-02-28",
+                      "due_date": "2024-03-13"
+                    },
+                    {
+                      "book_id": "B1",
+                      "title": "书A",
+                      "borrow_date": "2024-02-28",
+                      "due_date": "2024-03-13"
+                    }
+                  ]
+                },
+                "stdout": "{\"ok\": true, \"borrows\": [{\"book_id\": \"B2\", \"title\": \"书B\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\"}, {\"book_id\": \"B1\", \"title\": \"书A\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\"}]}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "C6",
+            "source": "independent",
+            "description": "错误日期、未知图书与读者不改变库存",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 1
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 1}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2023-02-29"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_date"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_date"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_date\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "X",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-01-01"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "book_not_found"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "book_not_found"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"book_not_found\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 85,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 5,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "X",
+                  "borrow_date": "2024-01-01"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"reader_not_found\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 6,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-02-28"
+                },
+                "expected": {
+                  "ok": true,
+                  "available_copies": 0
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 0,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-02-28",
+                    "due_date": "2024-03-13",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 0, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-02-28\", \"due_date\": \"2024-03-13\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "C7",
+            "source": "independent",
+            "description": "布尔值不能充当库存或编号",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": true
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_total_copies"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_total_copies"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_total_copies\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": true,
+                  "name": "甲"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_id\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "unknown"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "unknown_action"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"unknown_action\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "C8",
+            "source": "independent",
+            "description": "不存在读者不能查询",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "list_borrowed",
+                  "reader_id": "X"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"reader_not_found\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-01-01",
+                  "reader_id": "X"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "reader_not_found"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"reader_not_found\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V1",
+            "source": "independent",
+            "description": "缺少书名必须拒绝",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_title\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V2",
+            "source": "independent",
+            "description": "空白和非文本书名必须拒绝",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": " \t ",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_title\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": 3,
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_title"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_title\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 64,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V3",
+            "source": "independent",
+            "description": "缺少读者姓名必须拒绝",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_name\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 104,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V4",
+            "source": "independent",
+            "description": "空白和非文本姓名必须拒绝",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": " \t "
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_name\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 104,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": []
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_name"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_name\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V5",
+            "source": "independent",
+            "description": "纯空白编号必须拒绝",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": " \t ",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_id\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "  ",
+                  "name": "甲"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_id"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_id\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "missing"
+                    },
+                    "after": {
+                      "kind": "missing"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V6",
+            "source": "independent",
+            "description": "日期溢出返回错误而非崩溃",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 1
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 1}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "9999-12-31"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "invalid_date"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "invalid_date"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"invalid_date\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 240,
+                      "sha256": "df54d03d7c7c57e7a9f36ff34e6efd1d5b6d9c95c034db464b5c0817fcf277f4"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "V7",
+            "source": "independent",
+            "description": "保留原规格的还书日期规则，不额外收紧",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "book": {
+                    "book_id": "B1",
+                    "title": "书A",
+                    "total_copies": 1
+                  }
+                },
+                "stdout": "{\"ok\": true, \"book\": {\"book_id\": \"B1\", \"title\": \"书A\", \"total_copies\": 1}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "R1"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "reader": {
+                    "reader_id": "R1",
+                    "name": "R1"
+                  }
+                },
+                "stdout": "{\"ok\": true, \"reader\": {\"reader_id\": \"R1\", \"name\": \"R1\"}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 3,
+                "input": {
+                  "action": "borrow",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "borrow_date": "2024-03-01"
+                },
+                "expected": {
+                  "ok": true
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 0,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-03-01",
+                    "due_date": "2024-03-15",
+                    "returned": false
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 0, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-03-01\", \"due_date\": \"2024-03-15\", \"returned\": false}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 4,
+                "input": {
+                  "action": "return_book",
+                  "book_id": "B1",
+                  "reader_id": "R1",
+                  "return_date": "2024-02-01"
+                },
+                "expected": {
+                  "ok": true,
+                  "available_copies": 1
+                },
+                "actual": {
+                  "ok": true,
+                  "available_copies": 1,
+                  "record": {
+                    "book_id": "B1",
+                    "reader_id": "R1",
+                    "borrow_date": "2024-03-01",
+                    "due_date": "2024-03-15",
+                    "return_date": "2024-02-01",
+                    "returned": true
+                  }
+                },
+                "stdout": "{\"ok\": true, \"available_copies\": 1, \"record\": {\"book_id\": \"B1\", \"reader_id\": \"R1\", \"borrow_date\": \"2024-03-01\", \"due_date\": \"2024-03-15\", \"return_date\": \"2024-02-01\", \"returned\": true}}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 84,
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S1",
+            "source": "independent",
+            "description": "JSON损坏时拒绝新增并保留原字节",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 21,
+                      "sha256": "665720a27b9771d692068c1973a00458d649920bacc3445a89d2fb1862333c8a"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 21,
+                      "sha256": "665720a27b9771d692068c1973a00458d649920bacc3445a89d2fb1862333c8a"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S2",
+            "source": "independent",
+            "description": "错误根结构不能被当成空库",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "甲"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 2,
+                      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 2,
+                      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S3",
+            "source": "independent",
+            "description": "损坏字段不能静默修正并写回",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "甲"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 104,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 126,
+                      "sha256": "da7bfba723b9d0533e02bbef26fdeeb83c56b8899c35f3ca9ed5e63f96d9c82f"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 126,
+                      "sha256": "da7bfba723b9d0533e02bbef26fdeeb83c56b8899c35f3ca9ed5e63f96d9c82f"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S4",
+            "source": "independent",
+            "description": "悬空借阅记录拒绝加载",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-12-01"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 105,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 204,
+                      "sha256": "5285a9653178077a3b895735bf529171ac8a5229efc9eddecbedf87110ecf4c0"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 204,
+                      "sha256": "5285a9653178077a3b895735bf529171ac8a5229efc9eddecbedf87110ecf4c0"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S5",
+            "source": "independent",
+            "description": "写临时文件失败保留原库并返回JSON",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "list_overdue",
+                  "date": "2024-01-01"
+                },
+                "expected": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "actual": {
+                  "ok": true,
+                  "overdue": []
+                },
+                "stdout": "{\"ok\": true, \"overdue\": []}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 58,
+                      "sha256": "95df516dd9692e0b5bdf13763f27a67c60a8ebdde00f9ffdcea4060a19ee79ff"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 58,
+                      "sha256": "95df516dd9692e0b5bdf13763f27a67c60a8ebdde00f9ffdcea4060a19ee79ff"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              },
+              {
+                "number": 2,
+                "input": {
+                  "action": "add_book",
+                  "book_id": "B1",
+                  "title": "书A",
+                  "total_copies": 1
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "file",
+                      "bytes": 58,
+                      "sha256": "95df516dd9692e0b5bdf13763f27a67c60a8ebdde00f9ffdcea4060a19ee79ff"
+                    },
+                    "after": {
+                      "kind": "file",
+                      "bytes": 58,
+                      "sha256": "95df516dd9692e0b5bdf13763f27a67c60a8ebdde00f9ffdcea4060a19ee79ff"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          },
+          {
+            "id": "S6",
+            "source": "independent",
+            "description": "数据路径不可读时明确失败",
+            "requirement_ids": [],
+            "passed": true,
+            "steps": [
+              {
+                "number": 1,
+                "input": {
+                  "action": "add_reader",
+                  "reader_id": "R1",
+                  "name": "甲"
+                },
+                "expected": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "actual": {
+                  "ok": false,
+                  "error": "storage_error"
+                },
+                "stdout": "{\"ok\": false, \"error\": \"storage_error\"}",
+                "stderr": "",
+                "exit_code": 0,
+                "error": "",
+                "duration_ms": 83,
+                "file_checks": [
+                  {
+                    "file": "library_data.json",
+                    "passed": true,
+                    "before": {
+                      "kind": "directory"
+                    },
+                    "after": {
+                      "kind": "directory"
+                    }
+                  }
+                ],
+                "passed": true,
+                "difference": ""
+              }
+            ]
+          }
+        ],
+        "total": 19,
+        "passed_count": 19
+      },
+      "repair_count": 1,
+      "validation_error": "",
+      "logical_calls": 4,
+      "http_requests": 4,
+      "corrections": 0,
+      "planning": {
+        "requirements:0": {
+          "stage": "requirements",
+          "cycle": 0,
+          "corrections_used": 0,
+          "attempts": [
+            {
+              "time": "2026-10-15T08:29:47+00:00",
+              "status": "completed",
+              "correction": 0
+            }
+          ],
+          "feedback": null
+        },
+        "design:0": {
+          "stage": "design",
+          "cycle": 0,
+          "corrections_used": 0,
+          "attempts": [
+            {
+              "time": "2026-10-15T08:30:46+00:00",
+              "status": "completed",
+              "correction": 0
+            }
+          ],
+          "feedback": null
+        }
+      },
+      "duration_ms": 225048
+    }
+  ],
+  "usage_records": [
+    {
+      "agent": "requirements",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 1341,
+        "completion_tokens": 13383,
+        "total_tokens": 14724,
+        "prompt_tokens_details": {
+          "cached_tokens": 1152
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 9198
+        },
+        "prompt_cache_hit_tokens": 1152,
+        "prompt_cache_miss_tokens": 189
+      },
+      "request_number": 1,
+      "finish_reason": "stop"
+    },
+    {
+      "agent": "design",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 5396,
+        "completion_tokens": 6345,
+        "total_tokens": 11741,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4494
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 5140
+      },
+      "request_number": 2,
+      "finish_reason": "stop"
+    },
+    {
+      "agent": "coding",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 7421,
+        "completion_tokens": 15752,
+        "total_tokens": 23173,
+        "prompt_tokens_details": {
+          "cached_tokens": 384
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 9670
+        },
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 7037
+      },
+      "request_number": 3,
+      "finish_reason": "stop"
+    },
+    {
+      "agent": "coding",
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 7488,
+        "completion_tokens": 17841,
+        "total_tokens": 25329,
+        "prompt_tokens_details": {
+          "cached_tokens": 7296
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 10896
+        },
+        "prompt_cache_hit_tokens": 7296,
+        "prompt_cache_miss_tokens": 192
+      },
+      "request_number": 4,
+      "finish_reason": "stop"
+    }
+  ],
+  "http_request_count": 4,
+  "prompt_tokens": 21646,
+  "completion_tokens": 53321,
+  "recorded_cost_usd": 0.070479,
+  "requests_without_usage": 0,
+  "metrics": {
+    "enabled": {
+      "success": 1,
+      "total": 1,
+      "logical_calls": 4,
+      "http_requests": 4,
+      "corrections": 0,
+      "duration_seconds": 225.048
+    }
+  },
+  "notes": [
+    "历史契约失败发生在程序执行之前，日志中的total来自模型规格，不表示已运行该数量的用例；图书固定开发集为2项。后续代码已统一失败时的分母显示，原始流程状态和成绩未修改。"
+  ],
+  "postprocessing": " Report text and case-count explanation regenerated offline; original outcomes, run states, usage and captured implementation unchanged."
+}

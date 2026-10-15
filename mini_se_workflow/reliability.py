@@ -48,7 +48,8 @@ def write_report(report: dict, output: Path) -> None:
     description = ('图书任务定向复测，开启前置纠正，输出上限32768；不与首轮结果合并，不构成同期对照。'
                    if report.get('study_kind') == 'library-followup' else
                    '两组使用相同模型、提示、开发集、隐藏独立集及代码返工预算，只改变需求/设计的输出纠正预算。')
-    lines = ['# 前置纠正实验结果', '', f"模式：{report['mode']}；完成：{len(report['trials'])}/{report.get('expected_trials', 6)}。", '',
+    title = '# 图书任务输出预算复测' if report.get('study_kind') == 'library-followup' else '# 前置纠正实验结果'
+    lines = [title, '', f"模式：{report['mode']}；完成：{len(report['trials'])}/{report.get('expected_trials', 6)}。", '',
         description, '',
         '| 组别 | 成功 | 逻辑调用 | HTTP请求 | 前置纠正 | 耗时（秒） |', '|---|---|---|---|---|---|']
     for arm, item in report['metrics'].items():
@@ -63,9 +64,12 @@ def write_report(report: dict, output: Path) -> None:
         f"已记录用量：输入{report['prompt_tokens']}、输出{report['completion_tokens']} token。高峰全未缓存估算{report['recorded_cost_usd']:.6f}美元。",
         f"HTTP请求{report['http_request_count']}次，其中{report['requests_without_usage']}次无usage记录；金额不是完整账单。", '',
         '每组每任务仅一次，未固定服务随机种子，不构成统计显著或普遍能力证明。失败提前结束也包含在耗时内。',
-        '本实验两组均已使用新版提示及客户端，不能将结果视为完整旧版本与新版本的因果对照。旧单/三Agent实验原样保留。',
+        ('本次只有一次图书定向复测，没有同期关闭组，且输出预算已改变，不能据此作因果或稳定性判断。'
+         if report.get('study_kind') == 'library-followup' else
+         '本实验两组均已使用新版提示及客户端，不能将结果视为完整旧版本与新版本的因果对照。旧单/三Agent实验原样保留。'),
         'fixture模式有意注入错误引用，只验证纠正机制，不衡量模型能力。独立用例不参与生成或返工反馈。',
         '随附ZIP包含实验时源文件、套件与每次流程状态、代码、日志；源码哈希按原始字节计算。', '']
+    lines += [note + '\n' for note in report.get('notes', [])]
     output.with_suffix('.md').write_text('\n'.join(lines), encoding='utf-8')
 
 

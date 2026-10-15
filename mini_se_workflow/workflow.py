@@ -213,7 +213,7 @@ class MiniSEWorkflow:
                 started = time.monotonic()
                 event('validation', '验收执行器', 'running', '正在实际启动项目并核对预期结果。')
                 if pending.get('contract_error'):
-                    report = {'passed': False, 'error': pending['contract_error'], 'source_checks': [], 'cases': [], 'total': len(cases), 'passed_count': 0}
+                    report = {'passed': False, 'error': pending['contract_error'], 'source_checks': [], 'cases': [], 'total': self.runner.case_count(cases), 'passed_count': 0}
                 else:
                     def progress(result):
                         check_cancel()

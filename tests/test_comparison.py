@@ -10,6 +10,21 @@ from mini_se_workflow.store import RunStore
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_contract_failure_uses_the_fixed_development_denominator(self):
+        from mini_se_workflow.demo import DemoClient, DEMO_TASK, benchmark_cases
+        from mini_se_workflow.workflow import MiniSEWorkflow
+        class Client(DemoClient):
+            def complete_json(self, **kwargs):
+                if kwargs['agent_name'] == 'coding':
+                    return {'summary': 'incomplete', 'files': {}}
+                return super().complete_json(**kwargs)
+        with tempfile.TemporaryDirectory() as temp:
+            runner = comparison.DevelopmentRunner(benchmark_cases()[:1])
+            state = MiniSEWorkflow(Client(), RunStore(temp), mode='demo', runner=runner, max_repairs=0).run(DEMO_TASK)
+        self.assertEqual(state.status, 'failed_validation')
+        self.assertEqual(state.iterations[0]['validation']['total'], 1)
+        self.assertFalse(state.iterations[0]['validation']['cases'])
+
     def test_order_is_counterbalanced_and_all_trials_counted(self):
         items = [{'id':'a'},{'id':'b'},{'id':'c'}]
         order = comparison.schedule(items, 2)
