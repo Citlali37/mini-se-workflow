@@ -72,7 +72,7 @@ def run_check(name: str, arguments: list[str], directory: Path,
 
 def main() -> int:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    directory = ROOT / "outputs" / "review" / (stamp + "-" + uuid4().hex[:8])
+    directory = ROOT / "outputs" / "verification" / (stamp + "-" + uuid4().hex[:8])
     directory.mkdir(parents=True)
     plan = [
         ("unittest", ["-m", "unittest", "discover", "-s", "tests", "-v"], None),
