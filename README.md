@@ -1,211 +1,97 @@
 # Mini SE 工作流
 
-输入软件需求，由需求、设计、编码三个 Agent 协作生成小型 Python 项目。系统实际运行验收用例，把失败输入、实际输出和错误返回编码 Agent，默认最多返工两次（可配置0–5次）。最终项目、每版代码和验收记录都可查看。
+[![Workflow quality checks](https://github.com/Peanora/mini-se-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/Peanora/mini-se-workflow/actions/workflows/tests.yml)
 
-```text
-用户需求 → 需求 Agent → 设计 Agent → 编码 Agent → 实际验收
-                                            ↑          │
-                                            └─ 未通过 ─┘（最多返工2次）
-                                                       │
-                                                    全部通过
-                                                       ↓
-                                                   下载项目
+软件工程第二次作业，选择 **Mini SE 流程**：需求、设计、编码三个 Agent 共享结构化状态，生成可运行的小型 Python 工具。验收执行器实际启动程序，把失败输入和输出交回编码 Agent 返工。Web 支持需求确认、历史记录、恢复、代码差异和项目交付。
+
+**审查入口：[作业要求与证据对照](REVIEW.md)** · [设计与流程图](Design.md) · [详细使用说明](使用说明.md) · [提交清单](提交清单.md) · [一分钟演示](演示说明.md)
+
+## 流程
+
+```mermaid
+flowchart LR
+    U[用户需求] --> R[需求 Agent]
+    R --> Q{需求明确?}
+    Q -- 否 --> A[补充需求后继续原任务]
+    A --> R
+    Q -- 是 --> H[Web 查看 / 编辑 / 确认规格]
+    H --> D[设计 Agent]
+    D --> C[编码 Agent]
+    C --> V[实际执行验收]
+    V -- 失败且预算剩余 --> F[失败反馈]
+    F --> C
+    V -- 全部通过 --> O[项目 ZIP / 完整交付报告]
+    V -- 预算耗尽 --> E[保留未通过结果与代码]
 ```
 
-## 功能
+CLI 默认自动执行，使用 `--review` 可在需求确认前暂停。返工默认最多两次，可配置 0–5 次；初稿不计返工。需求/设计契约错误与模型调用异常保存为失败，需检查或重试失败节点，不会自动进入编码返工循环。
 
-- 三个独立职责的 Agent，共享结构化需求、设计、代码与运行状态。
-- 编码前固定验收用例；需求编号在设计和用例中可追踪。
-- 实际启动生成的程序，检查语法、JSON 输出、业务行为与进程重启后的持久化。
-- 失败反馈驱动返工；达到上限仍不通过时明确显示未通过状态。
-- 本地 Web 界面展示需求、设计、各版代码、测试结果、消息传递和执行日志。
-- 保存运行历史，支持项目 ZIP 下载及命令行使用。
-- 无密钥离线演示。离线响应使用固定模板，验收执行真实运行 Python 程序。
-- 待办事项示例额外使用四个固定测试用例，覆盖多任务持久化、空白标题、非法编号等行为。
+## 克隆后立即验证：无需密钥
 
-## 环境与启动
+Python **3.10+**，从仓库根目录执行。运行时无第三方包，不需要安装依赖或配置模型。以下使用 `python`；Windows 也可将它替换为 `py -3`，Linux/macOS 可用 `python3`。
 
-Python 3.10 或更高版本。运行时无需第三方 Python 包。
-
-### 先体验离线演示
-
-双击 `启动离线演示.bat`，浏览器会打开 **http://127.0.0.1:8002**。点击“开始开发”，检查需求与验收条件并点击“确认并继续开发”，观察第一次验收失败、编码 Agent 返工以及复验通过。
-
-也可以在本项目目录运行：
-
-```powershell
-py -3 -X utf8 -m mini_se_workflow --demo --web --open-browser
+```sh
+git clone https://github.com/Peanora/mini-se-workflow.git
+cd mini-se-workflow
+python -X utf8 -m mini_se_workflow.verification
 ```
 
-离线模式仅支持页面预置的待办事项需求。首稿故意遗漏标题校验，第一次实际验收应通过7/9个用例，返工后通过9/9。离线响应不会分析自由需求，也不代表真实模型的生成能力。
+一条命令顺序执行单元/集成测试、六项离线评测、离线单/三 Agent 对照和图书案例审查。返回 `0` 表示本轮检查均达到各自预期；失败返回 `1`。每次新建 `outputs/review/<时间-编号>/`，保留 `summary.json`、分项日志、JSON 结果及流程运行记录，不覆盖已提交的示例证据。通常需要约 1–3 分钟，以机器性能为准。
 
-### 使用 DeepSeek 处理自由需求
+**离线核验只证明程序机制与固定样例的行为，不证明真实模型能力。** 图书原版的 12 项质量缺陷应当继续复现，不能为了全绿删除失败案例。文件位置和预期见 [REVIEW.md](REVIEW.md)。
 
-```powershell
-Copy-Item .env.example .env
+## 打开界面
+
+```sh
+python -X utf8 -m mini_se_workflow --demo --web --open-browser
 ```
 
-在 `.env` 中填写自己的 `DEEPSEEK_API_KEY`，然后双击 `启动Web界面.bat`。也可运行：
+地址为 **http://127.0.0.1:8002**。Windows 也可双击 `启动离线演示.bat`。
 
-```powershell
-py -3 -X utf8 -m mini_se_workflow --web --open-browser
-```
+1. 保留预置待办需求，点击“开始开发”，检查需求和验收条件。
+2. 点击“确认并继续开发”，观察初稿 **7/9**、返工后 **9/9**。
+3. 查看失败原因、协作记录、每版代码差异，下载项目和报告。
 
-可配置模型、接口地址、超时与重试次数。环境变量优先于本地 `.env`。`.env` 已被 Git 忽略，项目下载不会包含密钥。
+离线模式使用固定响应，只支持预置待办需求。验收仍实际执行生成程序。需要自由需求时复制 `.env.example` 为 `.env`，填写自己的密钥，再运行 `python -X utf8 -m mini_se_workflow --web --open-browser`；详见 [使用说明](使用说明.md)。不要将密钥提交到仓库或录入视频。付费评测先估算请求次数及费用，离线核验命令不会调用模型。
 
-页面“填入示例”会同时开启固定的待办事项验收。如果修改示例文字，将作为自定义需求运行，使用需求 Agent 生成的验收用例。超出范围或存在核心歧义时，需求 Agent 可返回待确认问题，流程暂停在需求阶段；在页面填写答案后继续原任务，运行编号不变。需求明确后先检查、编辑并确认规格，再进入设计。
+## 已完成什么
 
-### 命令行
-
-```powershell
-# 不需要密钥，实际执行完整演示
-py -3 -X utf8 -m mini_se_workflow --demo --example todo
-
-# 使用模型处理文本统计需求
-py -3 -X utf8 -m mini_se_workflow --task-file examples/text-stats-requirement.txt
-
-# 导出 ZIP，请选择尚不存在的目标文件
-py -3 -X utf8 -m mini_se_workflow --demo --example todo --export outputs/todo-demo.zip
-
-# 不允许返工，展示首次验收失败的情况
-py -3 -X utf8 -m mini_se_workflow --demo --max-repairs 0
-```
-
-返回码：`0` 为验收通过，`2` 为需要补充需求或验收未通过，`1` 为运行异常。
-
-## 生成项目的协议
-
-首版支持使用标准库的小型本地 Python 工具，最多10个根目录文件，必须包含 `main.py` 和 `README.md`。
-
-每次执行 `python main.py`，从标准输入读取一个 JSON 对象，在标准输出返回一个 JSON 对象并以0退出；业务错误通过 JSON 表达。程序不应输出交互提示或额外日志到标准输出。
-
-```json
-{"action":"add","title":"完成作业"}
-```
-
-对应示例输出：
-
-```json
-{"ok":true,"task":{"id":1,"title":"完成作业","completed":false}}
-```
-
-同一用例每个步骤重启进程、共享工作目录，因此能够验证本地文件持久化。不同用例使用独立的临时目录。验收预期采用对象字段递归包含比较；数组长度及顺序精确比较，布尔值与数字区分。未指定的对象字段允许存在。
-
-## 输出与示例
-
-运行记录默认保存在 `outputs/<运行编号>/`：
-
-```text
-workflow.json                 完整共享状态、消息及日志
-revision-0/project/           初稿完整项目
-revision-0/validation.json    初稿验收结果
-revision-1/project/           第一次返工项目（发生返工时）
-revision-1/validation.json    复验结果
-```
-
-ZIP 包含最终项目文件，以及 `_workflow/` 下的需求规格、设计和完整流程记录。未通过的项目也可以下载，但页面会明确保留“验收未通过”状态；生成文件不等同于验收通过。
-
-`examples/todo-demo.zip` 是已实际验证的离线示例产物；`examples/text-stats-model.zip` 是真实 DeepSeek 生成的文本统计项目，包含完整开发记录，该次运行7/7个验收用例通过。另外六个独立检查记录在 `examples/text-stats-independent-checks.json`，用于补查 Unicode 换行、混合文本、布尔值与数组等输入。这些是本次示例的结果，后续生成结果需重新验收。
-
-`examples/todo-model.zip` 是真实模型生成的待办事项项目：第一次编码文件清单不符，第一次返工后源码范围检查未通过，第二次返工后13/13个用例通过。记录展示了模型真实收到反馈并修改代码的过程。
-
-`examples/todo-requirement.txt` 与 `examples/text-stats-requirement.txt` 是示例需求。录制演示可参考 `演示说明.md`。
-
-## 测试
-
-```powershell
-py -3 -X utf8 -m unittest discover -s tests -v
-```
-
-测试覆盖真实进程执行、失败返工、验收冻结、返工上限、需求澄清、故障状态保存、文件路径约束、超时、输出限制、进程环境、模型接口错误，以及 Web 运行历史和 ZIP 下载。
-
-## 项目结构
-
-| 模块 | 职责 |
+| 课程要求或增强项 | 当前实现 |
 |---|---|
-| `agents.py` | 三个 Agent 的提示词及输入输出 |
-| `contracts.py` | 需求、设计、代码的数据校验与需求追踪 |
-| `workflow.py` | 顺序编排、返工循环和共享状态 |
-| `runner.py` | 源码检查、真实进程执行与预期比较 |
-| `store.py` | 保存运行记录、版本产物与项目打包 |
-| `llm.py` | DeepSeek JSON 模型接口与有限重试 |
-| `demo.py` | 离线响应和独立固定验收用例 |
-| `web.py`、`static/index.html` | 本地 Web API 与页面 |
+| 至少两个 Agent、完整顺序流程 | 三个 Agent，需求 → 设计 → 编码 → 实际验收 → 交付 |
+| 消息传递或状态共享 | `WorkflowState`、消息摘要、逐阶段事件、磁盘检查点 |
+| 条件与循环 | 需求澄清分支、验收分支、有预算返工循环 |
+| 需求正确性 | Web 编辑/确认、需求编号追踪、冻结验收、补充后继续同一任务 |
+| 错误处理 | 有限网络重试、失败节点重试、中断恢复、取消、预算不重置 |
+| 结果可复核 | 代码差异、执行日志、ZIP、交付报告、独立评测及失败保留 |
+| 持续验证 | Windows/Ubuntu × Python 3.10/3.13，CI 上传每项日志与结果 |
+| 文档与扩展 | 流程图、架构和协议、新增节点/替换客户端说明、演示与提交指南 |
 
-架构与扩展方式见 `Design.md`。
+未实现并行调度或拖拽编排；页面是运行观察与人工确认界面。完整的要求—实现—测试映射见 [REVIEW.md](REVIEW.md)，不以此表代替实际核验。
 
-## 执行范围与限制
+## 实测结果与证据
 
-- 生成程序会在本机运行。临时目录、精简环境、导入检查、超时和输出限制用于减少错误影响，**不是操作系统级沙箱**。导入检查无法防御恶意 Python 代码，也不阻止全部文件访问。不要使用不可信模型生成的代码；若处理不可信输入，需增加容器或系统级隔离。
-- 不支持网络、第三方包安装、系统命令、子进程及复杂目录。存储使用当前工作目录中的相对路径。
-- 默认每步最多5秒，每轮验收总预算60秒，合计标准输出与错误输出限制64 KB。
-- 真实模型生成的验收用例也可能有遗漏或错误。固定示例测试能补充特定功能检查，不能证明所有程序都正确。需求正确性仍需人工核对。
-- 单次运行是串行流程，本地服务一次只运行一个任务。服务关闭后，未完成任务标为中断；可以查看历史记录并显式从检查点恢复，不自动消耗模型费用。
-- 返工预算耗尽时保留最后一份有效文件及全部反馈；模型或执行器异常可重试失败节点，恢复不重置返工预算。
+| 证据 | 已记录结果 | 解释 |
+|---|---|---|
+| 自动化测试 | 58 项，覆盖执行器、工作流、恢复、Web、报告和核验入口 | 运行上方命令或查看 [CI](https://github.com/Peanora/mini-se-workflow/actions) 日志 |
+| 离线流程与评测 | 待办 7/9 → 9/9；六项评测符合预期 | 固定响应，只验证机制 |
+| 真实需求评测 | 首轮 3/6；定向复测 2/3 | [失败记录与口径](examples/评测说明.md)，不能拼成全通过 |
+| 图书案例审查 | 原业务复核 9/9；新增质量检查原版 0/12、审查修订 12/12 | [原版/修订版与完整结果](examples/library-audit/审查说明.md)；修订由开发助手直接完成，不冒充流程自动返工 |
+| 真实单/三 Agent 对照 | 单 Agent 5/6，三 Agent 1/6 | [报告](examples/comparison-real.md)、[原始 JSON](examples/comparison-real.json)、[全部运行归档](examples/comparison-real.zip)；小样本不能证明一般优劣 |
 
+图书原始运行的 **8/8** 验收保持不变；新增要求单独计分，修订版独立检查为 **21/21**。保存的真实记录可审阅，重新调用模型不保证得到相同结果。
 
-## 升级版：需求确认与恢复
+## 结构与边界
 
-Web 默认在需求分析后暂停。编辑表单可修改需求说明、假设和验收输入输出；完整规格编辑可新增或删除需求与用例，保存前检查编号关联和覆盖。点击“确认并继续开发”后冻结验收条件。离线模板只支持确认原规格，不能演示自由规格修改。真实模型模式支持编辑及补充需求，所有修改记录留在原运行中。
+| 位置 | 职责 |
+|---|---|
+| `mini_se_workflow/agents.py`、`contracts.py` | 三个职责、数据契约和覆盖检查 |
+| `workflow.py`、`models.py`、`store.py` | 编排、状态、检查点、版本和归档（位于包内） |
+| `runner.py`、`llm.py` | 真实子进程验收、模型客户端（位于包内） |
+| `web.py`、`static/index.html` | 本地界面与 API（位于包内） |
+| `evaluation.py`、`comparison.py`、`library_audit.py`、`verification.py` | 独立评测、对照与离线核验（位于包内） |
+| `tests/`、`examples/` | 测试、固定套件、真实与离线证据 |
 
-运行失败、服务中断或取消后，在历史记录中选择对应任务，点击“从检查点恢复”。已完成的需求/设计不重复调用；代码已生成但验收中断时复用该版代码重新验收。取消可中止验收子进程；等待模型响应时只能在响应返回或超时后取消，不能撤回已经发出的远端请求。不要同时启动多个服务操作同一输出目录；进程存活检查避免把另一进程运行中的任务误标为中断，但不提供分布式锁。
+当前生成目标是使用标准库、JSON 标准输入输出的小型本地 Python 工具，最多 10 个根目录文件。不支持联网工具、安装第三方依赖或任意框架。验收有临时目录、精简环境、时间和输出限制，**不构成操作系统级安全沙箱**。本地服务串行执行，不提供分布式锁；远端模型请求不能立即撤回。验收通过也不能保证需求无遗漏。
 
-CLI 保留默认自动执行，也可分阶段：
-
-```powershell
-py -3 -X utf8 -m mini_se_workflow --demo --review
-# 替换下面的编号为上一步输出的真实运行编号
-py -3 -X utf8 -m mini_se_workflow --demo --resume <运行编号> --action confirm
-# 真实模型模式，规格文件可取自 workflow.json 的 specification 字段
-py -3 -X utf8 -m mini_se_workflow --resume <运行编号> --action confirm --spec-file specification.json
-py -3 -X utf8 -m mini_se_workflow --resume <运行编号> --action clarify --answer "需要保存在本地文件"
-py -3 -X utf8 -m mini_se_workflow --resume <运行编号> --action retry
-```
-
-旧版记录可查看和下载，但没有恢复检查点，不能续跑。新任务可用 `--max-repairs 0` 到 `--max-repairs 5` 配置预算，默认2。初稿不计返工，所以默认最多产生3版；这不是课程限制，也不是模型只能修两次。有限预算控制时间、费用和重复失败，耗尽后需要检查需求或设计，再新建任务。
-
-## 代码差异、报告与评测
-
-代码面板可查看每版实际文件差异和失败原因。“下载交付报告”导出 Markdown，项目 ZIP 中也包含 `_workflow/report.md`。报告记录需求确认、需求→文件→用例追踪、各版通过情况和差异；不把编号关联当成语义正确性证明。
-
-```powershell
-# 无密钥离线机制验证
-py -3 -X utf8 -m mini_se_workflow.evaluation
-# 会产生费用，先按 examples/评测说明.md 的方法估算；费用配置可能变化
-py -3 -X utf8 -m mini_se_workflow.evaluation --real --output outputs/evaluation-real.json
-```
-
-六项评测覆盖正常、边界、歧义和超范围。独立用例预先固定，不发给编码 Agent，也不作为返工反馈；报告保存失败输入输出和套件哈希。离线固定响应只能验证机制。首轮真实结果、定向复测及费用说明见 `examples/评测说明.md`，不能把两次实验拼成六项全通过的成绩。
-
-GitHub Actions 在 push/PR 时测试 Windows/Linux、Python 3.10/3.13，不使用真实模型密钥。升级要求、进展、验收依据和已知限制集中记录在 `项目进展.md`。
-
-## 图书案例的独立审查
-
-`examples/library-audit/` 保存原始真实模型运行、原始代码、审查修订代码、逐步结果和说明。原运行 `5452d526da7047cf` 的8/8记录保持不变。21项独立检查分为原需求业务复核9项、补充质量要求12项；原版9/21，修订版21/21，两者均通过原8项回归。
-
-补充要求包括必填姓名/书名、空白编号、日期溢出、损坏文件不能重置、写入失败保留原字节。独立执行器支持受限的初始数据夹具和文件SHA256不变断言，能检验“报错却偷偷改了数据”，不只检查JSON响应。
-
-在源码目录复现，不调用模型：
-
-```powershell
-py -3 -X utf8 -m mini_se_workflow.library_audit --output outputs/library-audit.json
-# 可选：向历史列表新增明确标注的审查修订记录，不覆盖原记录
-py -3 -X utf8 -m mini_se_workflow.library_audit --publish
-```
-
-修订代码由本次开发助手按审查发现直接修改，界面标注“人工审查修订”，表示独立于Mini SE内三个Agent的开发干预，不代表工作流自动修复，也不声称用户逐行手写。下载成品见 `examples/library-reviewed.zip`。后续生成所用设计/编码提示也加入相同通用质量原则，提示不等于质量保证。
-
-## 单 Agent 对照
-
-预注册条件及费用估算在 `examples/单Agent对照方案.md`，固定三个任务、每方案两次重复、相同开发测试和最多两次返工，独立测试不参与反馈。先查看原始结果，再讨论收益，不预设多Agent更优。
-
-```powershell
-# 无密钥：只测试实验机制
-py -3 -X utf8 -m mini_se_workflow.comparison --repeats 1
-# 真实实验会产生费用，须先估算；参考预注册方案
-py -3 -X utf8 -m mini_se_workflow.comparison --real --repeats 2 --request-limit 60 --max-tokens 16384 --output outputs/comparison-real.json
-```
-
-真实实验的完整记录在 `examples/comparison-real.json`，每个失败都保留在分母。运行记录在 `outputs/comparison/runs/`，避免与普通Web任务混淆。时间包括失败提前停止和本地验收，失败更快不意味着成功生成更快；token费用是服务已返回用量的估算，不是完整账单。课堂讲解见 `答辩说明.md`。
-
-本次真实对照为单Agent5/6、三Agent1/6，详细结果与限制见 `examples/comparison-real.md`。可用 `py -3 -X utf8 -m mini_se_workflow.experiment_report examples/comparison-real.json` 从已有结果重导出报告，不再次调用模型。
+升级要求与阶段验收记录见 [项目进展](项目进展.md)，设计取舍和实验局限见 [答辩说明](答辩说明.md)。

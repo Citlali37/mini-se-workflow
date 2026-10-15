@@ -10,7 +10,11 @@
 flowchart TD
     UI[Web / CLI] --> W[MiniSEWorkflow]
     W --> R[需求 Agent]
-    R --> S[(WorkflowState)]
+    R --> Q1{存在待确认问题?}
+    Q1 -- 是 --> I[补充答案 / 同一运行重新分析]
+    I --> R
+    Q1 -- 否 --> H[Web 需求编辑与确认 / CLI 可选]
+    H --> S[(WorkflowState / 冻结规格)]
     S --> D[设计 Agent]
     D --> S
     S --> C[编码 Agent]
@@ -75,7 +79,7 @@ Agent 不相互调用。Workflow 负责取出上一步的结果、检查格式�
 
 1. 校验用户需求和示例标记，创建运行编号。
 2. 执行需求 Agent；存在核心待确认问题时结束为 `needs_input`。
-3. 固定验收用例，执行设计 Agent。
+3. Web 默认暂停到 `awaiting_confirmation`，允许查看/修改并确认；CLI 默认自动确认，可用 `--review` 暂停。确认后固定验收用例，执行设计 Agent。
 4. 执行编码 Agent，校验完整文件清单与文件大小。
 5. 检查 Python 语法和支持范围，实际运行验收。
 6. 全部通过则结束为 `approved`；未通过则携带真实失败反馈返工。
